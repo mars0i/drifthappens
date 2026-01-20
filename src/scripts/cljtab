@@ -1,0 +1,7 @@
+#!/bin/sh
+# Opens clojure in another Terminal tab using the
+# newtab function defined in ~/bin/definenewtab based on 
+# https://stackoverflow.com/a/12147804/1455243
+source ~/bin/definenewtab # allows opening new Terminal tab:
+newtab src/scripts/clojurenrepl  # Starts nrepl new tab
+
