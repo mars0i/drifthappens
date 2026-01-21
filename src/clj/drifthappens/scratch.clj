@@ -1,16 +1,17 @@
 ;; Initial ns statement copied from
 ;; https://generateme.github.io/fastmath/clay/vector_matrix.html#matrices
 (ns drifthappens.scratch
-  (:require [fastmath.vector :as v]
+  (:require ;[clojure.math :as m]
+            [fastmath.vector :as v]
             [fastmath.matrix :as mat]
+            [fastmath.core :as fm]
             ;[fastmath.dev.codox :as codox]
             ;[fastmath.dev.clay :as utls]
             ;[fastmath.dev.plotly :as plt]
-            [fastmath.core :as m]
-            [scicloj.kindly.v4.kind :as kind]
             ;[fastmath.dev.ggplot :as gg]
-            [fastmath.stats :as stats]
-            )
+            ;[fastmath.stats :as stats]
+            [scicloj.kindly.v4.kind :as kind]
+            [utils.misc :as misc])
   (:import [fastmath.vector Vec2 Vec3 Vec4]
            [fastmath.matrix Mat2x2 Mat3x3 Mat4x4]))
 
@@ -49,19 +50,31 @@
 (mat/entry mm3 1 1)
 (mat/entry mm3 3 3)
 
+(fm/combinations 4 2)
+
+
 ;; ---
 
 (defn sample-prob
   [fit-A fit-B pop-size freq-A]
   (let [freq-B (- pop-size freq-A)
-        overall-fit-A (* fit-A freq-A)
-        overall-fit-B (* fit-B freq-B)
+        overall-fit-A (* freq-A fit-A)
+        overall-fit-B (* freq-B fit-B)
         total-fit (+ overall-fit-A overall-fit-B)]
     (/ overall-fit-A total-fit)))
 
 (defn tran-prob
   [sample-prob-A sample-prob-B sample-size num-A]
   (let [num-B (- sample-size num-A)]
-  (* (comb sample-size num-A)
-     (expt sample-prob-A num-A)
-     (expt sample-prob-B num-B))))
+    (* (fm/combinations sample-size num-A)
+       (fm/pow sample-prob-A num-A)
+       (fm/pow sample-prob-B num-B))))
+
+(defn tran-mat
+  [fit-A fit-B pop-size sample-size]
+  (let [pop-idxs (misc/irange pop-size)
+        sample-idxs (misc/irange sample-size)
+        sample-probs (map (partial sample-prob fit-A fit-B pop-size) pop-idxs) ; ???
+        tran-probs (map identity sample-idxs)] ; FIXME
+    ))
+
