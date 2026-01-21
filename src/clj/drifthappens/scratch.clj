@@ -48,3 +48,20 @@
 (mat/shape mm3)
 (mat/entry mm3 1 1)
 (mat/entry mm3 3 3)
+
+;; ---
+
+(defn sample-prob
+  [fit-A fit-B pop-size freq-A]
+  (let [freq-B (- pop-size freq-A)
+        overall-fit-A (* fit-A freq-A)
+        overall-fit-B (* fit-B freq-B)
+        total-fit (+ overall-fit-A overall-fit-B)]
+    (/ overall-fit-A total-fit)))
+
+(defn tran-prob
+  [sample-prob-A sample-prob-B sample-size num-A]
+  (let [num-B (- sample-size num-A)]
+  (* (comb sample-size num-A)
+     (expt sample-prob-A num-A)
+     (expt sample-prob-B num-B))))
