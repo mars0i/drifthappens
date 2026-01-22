@@ -14,3 +14,4 @@ pom.xml.asc
 .cpcache/
 docs/
 doc/WrightFisherNt1.md
+.lnvim.lua
