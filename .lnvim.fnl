@@ -1,4 +1,18 @@
-;; nvim functions and keymappings to evaluate scicloj Clay files
+;; .lnvim.fnl
+;; Fennel defs of nvim functions, keymappings to evaluate scicloj Clay files
+;; This file get translated into .lnvim.lua .
+
+;; Most of the code below is setup for the key mappings defined in the 
+;; on-filetype definition near the end of this file.  At the time of
+;; writing this comment, they were:
+;;
+;;    <localleader>env
+;;    Evaluates the entire namespace. Actually, it evals the file.
+;;    So you have to save it first.  I could add the save to the def, I guess.
+;;
+;;    <localleader>ev
+;;    I think this is supposed to eval a particular form, but it's not working.
+;;
 
 (module viz.lnvim
   {autoload {a aniseed.core
