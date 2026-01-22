@@ -1,3 +1,7 @@
+;; ### Wright-Fisher models
+;; drifthappens.wrightfisher, defined in drifthappens/wrightfisher.clj
+
+^:kindly/hide-code
 ;; Initial ns statement copied from
 ;; https://generateme.github.io/fastmath/clay/vector_matrix.html#matrices
 (ns drifthappens.wrightfisher
@@ -17,42 +21,8 @@
   (:import [fastmath.vector Vec2 Vec3 Vec4]
            [fastmath.matrix Mat2x2 Mat3x3 Mat4x4]))
 
-
-(def mat1 (mat/real-matrix [[1 2 3 4]
-                            [5 6 7 8]]))
-
-(def mat2 (mat/mat         [[1 2 3 4]
-                            [5 6 7 8]]))
-
-(def mat3 (mat/mat         [[1 2]
-                            [5 6]]))
-(type mat1)
-(type mat2)
-(type mat3)
-
-
-(= mat1 mat2)
-
-(mat/entry mat1 1 1)
-(mat/entry mat2 1 1)
-
-(mat/shape mat1)
-(mat/shape mat2)
-
-(def mm1 (mat/mulmt mat1 mat2))
-(mat/shape mm1)
-(mat/entry mm1 1 1)
-
-(def mm2 (mat/mulm mat1 (mat/transpose mat2)))
-(mat/shape mm2)
-(mat/entry mm2 1 1)
-
-(def mm3 (mat/mulm (mat/transpose mat1) mat2))
-(mat/shape mm3)
-(mat/entry mm3 1 1)
-(mat/entry mm3 3 3)
-
-(fm/combinations 4 2)
+;; See tips/fastmathMatices.clj for tips on using fastmath matrices
+;; and vectors.
 
 
 ;; ---
@@ -61,10 +31,14 @@
 ;;
 ;; where $i=$`freq-A`, $N=$`pop-size`, and $w_\alpha =$`fit-α`.
 (defn sample-prob
-  [fit-A fit-B pop-size freq-A]
-  (let [freq-B (- pop-size freq-A)
-        overall-fit-A (* freq-A fit-A)
-        overall-fit-B (* freq-B fit-B)
+  "Returns the probability of sampling an individual of type A (rather
+  than B) from a population of size pop-size, when exactly num-A members
+  of the population have type A, and the fitnesses of A and B are
+  fit-A and fit-B, respetively."
+  [fit-A fit-B pop-size num-A]
+  (let [num-B (- pop-size num-A)
+        overall-fit-A (* num-A fit-A)
+        overall-fit-B (* num-B fit-B)
         total-fit (+ overall-fit-A overall-fit-B)]
     (/ overall-fit-A total-fit)))
 
@@ -73,6 +47,9 @@
 ;; where $M=$`sample-size`, $j=$`num-A`, and $p_i$ and $q_i$ are
 ;; values of `sample-prob` for $i=$`freq-A`.
 (defn tran-prob
+  "Returns the probability that sample of sample-size individuals will
+  include exactly num-A A (not B) individuals, when the probability of
+  choosing an A individual is sample-prob-A."
   [sample-prob-A sample-size num-A]
   (let [sample-prob-B (- 1 sample-prob-A)
         num-B (- sample-size num-A)]
