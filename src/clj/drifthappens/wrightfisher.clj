@@ -27,14 +27,13 @@
 
 ;; ---
 
-;; $$p_i = \frac{iw_{A}}{w_{A}i + w_{B}(N-i)}$$
-;;
-;; where $i=$`freq-A`, $N=$`pop-size`, and $w_\alpha =$`fit-α`.
+;; $p_i = \frac{iw_{A}}{w_{A}i + w_{B}(N-i)}\,,\,$
+;; where $i=$`freq-A`, $N=$`pop-size`, and $w__ =$`fit-_`.
 (defn sample-prob
-  "Returns the probability of sampling an individual of type A (rather
-  than B) from a population of size pop-size, when exactly num-A members
-  of the population have type A, and the fitnesses of A and B are
-  fit-A and fit-B, respetively."
+  "Returns the probability of sampling an individual of type A (rather than
+  B) from a population of size pop-size, when exactly num-A members of the
+  population have type A, and the fitnesses of A and B are fit-A and fit-B,
+  respetively."
   [fit-A fit-B pop-size num-A]
   (let [num-B (- pop-size num-A)
         overall-fit-A (* num-A fit-A)
@@ -42,10 +41,9 @@
         total-fit (+ overall-fit-A overall-fit-B)]
     (/ overall-fit-A total-fit)))
 
-;; $$\Pi_{ji} = \binom{M}{j} p_i^j q_i^{M-j}$$
-;;
-;; where $M=$`sample-size`, $j=$`num-A`, and $p_i$ and $q_i$ are
-;; values of `sample-prob` for $i=$`freq-A`.
+;; $\Pi_{ji} = \binom{M}{j} p_i^j q_i^{M-j}\,,\,$
+;; where $M=$`sample-size`, $j=$`num-A`, and $p_i$ is the value of values 
+;; of `sample-prob` for $i=$`freq-A`, and $q_i=1-p_i$.
 (defn tran-prob
   "Returns the probability that sample of sample-size individuals will
   include exactly num-A A (not B) individuals, when the probability of
