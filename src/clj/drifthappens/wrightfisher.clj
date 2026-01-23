@@ -10,8 +10,8 @@
 ;; Initial ns statement copied from https://generateme.github.io/fastmath/clay/vector_matrix.html#matrices
 (ns drifthappens.wrightfisher
   (:require ;[clojure.math :as m]
-            [fastmath.vector :as v]
-            [fastmath.matrix :as mat]
+            [fastmath.vector :as fvec]
+            [fastmath.matrix :as fmat]
             [fastmath.core :as fm]
             ;[fastmath.dev.codox :as codox]
             ;[fastmath.dev.clay :as utls]
@@ -21,8 +21,8 @@
             [scicloj.kindly.v4.kind :as kind]
             [tablecloth.api :as tc]
             [scicloj.tableplot.v1.plotly :as plotly]
-            [utils.misc :as misc])
-  (:import [fastmath.vector Vec2 Vec3 Vec4]
+            [utils.misc :as um])
+  (:import [fastmath.vector ArrayVec Vec2 Vec3 Vec4]
            [fastmath.matrix Mat2x2 Mat3x3 Mat4x4]))
 
 
@@ -64,14 +64,14 @@
        (fm/pow sample-prob-A As-sampled)
        (fm/pow sample-prob-B num-B))))
 
-(defn tran-probs
-  "Create a sequence of transition probabilities for each number of A's
-  between 0 and sample-size.  (Summing them should be very close to 1.)"
-  [sample-prob-A sample-size]
-  (map (partial tran-prob sample-prob-A sample-size)
-       (misc/irange sample-size)))
-
 (comment
+  (defn tran-probs
+    "Create a sequence of transition probabilities for each number of A's
+    between 0 and sample-size.  (Summing them should be very close to 1.)"
+    [sample-prob-A sample-size]
+    (map (partial tran-prob sample-prob-A sample-size)
+         (um/irange sample-size)))
+
   (tran-probs 0.6 4.0)
   (reduce + (tran-probs 0.6 4.0))
   (reduce + (tran-probs 0.5 1000))
@@ -79,39 +79,58 @@
   (tran-probs 0.4 200)
 )
 
-(defn tran-mat-probs
+(defn tran-mat-elems
   [fit-A fit-B pop-size sample-size]
-  )
+  (for [i (um/irange pop-size)]
+    (let [sp (sample-prob fit-A fit-B pop-size i)]
+      (for [j (um/irange sample-size)]
+        (let [tp (tran-prob sp sample-size j)]
+          tp)))))
 
-
-;; Better to multiply with a row vector on the left, since those 
-;; vectors are more natural in Clojure and fastmath.
-;; So (I think) it's row totals that sum to 1.  See Grimmett & Stirzacker
-;; 3d p. 215.
-;; Oh, but mulv mults by a col vec that's on the right. And vtmul
-;; does a transpose first.  Need to learn aobut the vectors.
-
-;; That means that the input is on the left, so num rows has to be
-;; $N=$`pop-size`, while the output matches the column count,
-;; $M=$`sample-size`.  So it's an $N\times M$ i.e.
-;; `pop-size`$\times$`sample-size` matrix.
-;;
-;; i.e. for each $i\in 0, \ldots, N$ inclusive, generate a row with
-;; tran prob values for each $j\in 0, \ldots, M$.
-
-(defn tran-mat-old
+(defn tran-mat
   [fit-A fit-B pop-size sample-size]
-  (let [pop-idxs (misc/irange pop-size)
-        sample-idxs (misc/irange sample-size)
-        rows (for [freq-A pop-idxs]
-               (let [s-prob-A (sample-prob fit-A fit-B pop-size freq-A)]
-                 (map (partial tran-prob s-prob-A sample-size)
-                      sample-idxs)))]
-    (mat/mat rows)))
+  ;; apply fmat/transpose to make each column sum = 1:
+  (fmat/mat (tran-mat-elems fit-A fit-B pop-size sample-size))) ; each row sum = 1
+
+(comment
+  (def es (tran-mat-elems 0.7 0.55 10 5))
+  (count es)
+  (map count es)
+  (map (partial apply +) es)
+  (def m1 (fmat/mat es)) ; stoch mat with each row sum = 1, i.e. for a horiz row on the left
+  (def m2 (fmat/transpose (fmat/mat es))) ; stoch mat with each col sum = 1, i.e. for a column vector on the right
+  (fmat/shape m1)
+  (fmat/shape m2)
+
+  (def initial-state (concat (repeat 5 0) [1] (repeat 5 0)))
+
+  (def s0 (fvec/array-vec initial-state))
+  (type s0)
+  ;; another way to do the same thing:
+  (def s0' (fvec/make-vector 11 initial-state))
+  (type s0')
+
+  (fmat/mulv m2 s0)  ; fails
+  (fmat/vtmul s0 m1) ; fails
+
+  (def m0 (fmat/mat (vector initial-state))) ; a row vector
+  (fmat/shape m0)
+  (def m0t (fmat/transpose m0))
+  (fmat/shape m0t) ; a column vector
+
+  (def vm (fmat/mulm m0 m1))
+  (fmat/shape vm)
+  (def mv (fmat/mulm m2 m0t))
+  (fmat/shape mv)
+
+  (fmat/mat->array2d mv)
+  (fmat/mat->array2d vm)
+
+)
 
 (comment
   (def m (tran-mat 5 2 3 2))
-  (mat/shape m)
+  (fmat/shape m)
 ;#object[org.apache.commons.math3.linear.Array2DRowRealMatrix 0x51bf848e
 ;        "Array2DRowRealMatrix
 ;        {{1.0,0.0,0.0},
@@ -119,10 +138,10 @@
 ;         {0.0277777778,0.2777777778,0.6944444444},
 ;         {0.0,0.0,1.0}}"]
 
-    (mat/mat->array2d m)
+    (fmat/mat->array2d m)
 
     ;; Should be a sequence of 1's:
     (map (fn [xs] (apply + xs))
-         (mat/mat->array2d m))
+         (fmat/mat->array2d m))
 
 )
