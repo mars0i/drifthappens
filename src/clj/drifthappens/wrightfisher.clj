@@ -1,9 +1,13 @@
 ;; ### Wright-Fisher models
-;; drifthappens.wrightfisher, defined in drifthappens/wrightfisher.clj
+;; drifthappens/wrightfisher.clj
 
+;; See tips/fastmathMatices.clj for tips on using fastmath matrices and vectors.
+
+;; ---
+
+;; (ns drifthappens.wrightfisher ...)
 ^:kindly/hide-code
-;; Initial ns statement copied from
-;; https://generateme.github.io/fastmath/clay/vector_matrix.html#matrices
+;; Initial ns statement copied from https://generateme.github.io/fastmath/clay/vector_matrix.html#matrices
 (ns drifthappens.wrightfisher
   (:require ;[clojure.math :as m]
             [fastmath.vector :as v]
@@ -21,44 +25,64 @@
   (:import [fastmath.vector Vec2 Vec3 Vec4]
            [fastmath.matrix Mat2x2 Mat3x3 Mat4x4]))
 
-;; See tips/fastmathMatices.clj for tips on using fastmath matrices
-;; and vectors.
-
 
 ;; ---
 
 ;; $p_i = \frac{iw_{A}}{w_{A}i + w_{B}(N-i)}\,,\,$
-;; where $i=$`freq-A`, $N=$`pop-size`, and $w__ =$`fit-_`.
+;; where $i=$`abs-freq-A`, $N=$`pop-size`, and $w__ =$`fit-_`.
 (defn sample-prob
   "Returns the probability of sampling an individual of type A (rather than
-  B) from a population of size pop-size, when exactly num-A members of the
-  population have type A, and the fitnesses of A and B are fit-A and fit-B,
-  respetively."
-  [fit-A fit-B pop-size num-A]
-  (let [num-B (- pop-size num-A)
-        overall-fit-A (* num-A fit-A)
+  B) from a population of size pop-size, when exactly abs-freq-A members of
+  the population have type A, and the fitnesses of A and B are fit-A and
+  fit-B, respectively."
+  [fit-A fit-B pop-size abs-freq-A]
+  (let [num-B (- pop-size abs-freq-A)
+        overall-fit-A (* abs-freq-A fit-A)
         overall-fit-B (* num-B fit-B)
         total-fit (+ overall-fit-A overall-fit-B)]
     (/ overall-fit-A total-fit)))
 
 ;; $\Pi_{ji} = \binom{M}{j} p_i^j q_i^{M-j}\,,\,$
-;; where $M=$`sample-size`, $j=$`num-A`, and $p_i$ is the value of values 
+;; where $M=$`sample-size`, $j=$`As-sampled`, and $p_i$ is the value of values 
 ;; of `sample-prob` for $i=$`freq-A`, and $q_i=1-p_i$.
+;; 
+;; NOTE: fm/combinations, and hence the following function, returns #NaN if 
+;; $N=$`sample-size` gets much above 1000.
+;; This seems to be due to the binomial coefficient getting really small.
+;; So maybe this isn't Clojure's or fastmath's problem.  You'd need to use
+;; some kind of approximation in any language, I think.  (Fastmath has a
+;; log-combinations.  Could that be helpful?)
 (defn tran-prob
   "Returns the probability that sample of sample-size individuals will
-  include exactly num-A A (not B) individuals, when the probability of
-  choosing an A individual is sample-prob-A."
-  [sample-prob-A sample-size num-A]
+  include exactly As-sampled A (not B) individuals, when the probability of
+  choosing an A individual is sample-prob-A.  Note that sample-size can't
+  be much more than 1000--else the function will return #NaN."
+  [sample-prob-A sample-size As-sampled]
   (let [sample-prob-B (- 1 sample-prob-A)
-        num-B (- sample-size num-A)]
-    (* (fm/combinations sample-size num-A)
-       (fm/pow sample-prob-A num-A)
+        num-B (- sample-size As-sampled)]
+    (* (fm/combinations sample-size As-sampled)
+       (fm/pow sample-prob-A As-sampled)
        (fm/pow sample-prob-B num-B))))
 
 (defn tran-probs
-  "Create one row/column of transition probabilities that sum to 1."
-  [sample-prob-A sample-size num-A]
+  "Create a sequence of transition probabilities for each number of A's
+  between 0 and sample-size.  (Summing them should be very close to 1.)"
+  [sample-prob-A sample-size]
+  (map (partial tran-prob sample-prob-A sample-size)
+       (misc/irange sample-size)))
+
+(comment
+  (tran-probs 0.6 4.0)
+  (reduce + (tran-probs 0.6 4.0))
+  (reduce + (tran-probs 0.5 1000))
+  (fm/combinations 1025 500)
+  (tran-probs 0.4 200)
+)
+
+(defn tran-mat-probs
+  [fit-A fit-B pop-size sample-size]
   )
+
 
 ;; Better to multiply with a row vector on the left, since those 
 ;; vectors are more natural in Clojure and fastmath.
@@ -75,7 +99,7 @@
 ;; i.e. for each $i\in 0, \ldots, N$ inclusive, generate a row with
 ;; tran prob values for each $j\in 0, \ldots, M$.
 
-(defn tran-mat
+(defn tran-mat-old
   [fit-A fit-B pop-size sample-size]
   (let [pop-idxs (misc/irange pop-size)
         sample-idxs (misc/irange sample-size)
