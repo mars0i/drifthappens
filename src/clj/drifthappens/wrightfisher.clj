@@ -55,6 +55,11 @@
        (fm/pow sample-prob-A num-A)
        (fm/pow sample-prob-B num-B))))
 
+(defn tran-probs
+  "Create one row/column of transition probabilities that sum to 1."
+  [sample-prob-A sample-size num-A]
+  )
+
 ;; Better to multiply with a row vector on the left, since those 
 ;; vectors are more natural in Clojure and fastmath.
 ;; So (I think) it's row totals that sum to 1.  See Grimmett & Stirzacker
