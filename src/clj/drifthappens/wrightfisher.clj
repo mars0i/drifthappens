@@ -3,6 +3,9 @@
 
 ;; See tips/fastmathMatices.clj for tips on using fastmath matrices and vectors.
 
+;; Note in "left/right multiplication" of a matrix and a vector, "right" or 
+;; "left" refers to the location of the vector.
+
 ;; ---
 
 ;; (ns drifthappens.wrightfisher ...)
@@ -25,6 +28,24 @@
   (:import [fastmath.vector ArrayVec Vec2 Vec3 Vec4]
            [fastmath.matrix Mat2x2 Mat3x3 Mat4x4]))
 
+;; ---
+
+
+(defn mpow
+  "Multiply a square matrix by itself n times."
+  [m n]
+  (loop [acc-mat m
+         i 1]
+    (if (= i n)
+      acc-mat
+      (recur (fmat/mulm m acc-mat)
+             (inc i)))))
+
+(comment
+  (def unit (fmat/mat [[2]]))
+  (fmat/mat->array2d unit) ; row vec
+  (fmat/mat->array2d (mpow unit 4))
+)
 
 ;; ---
 
@@ -87,13 +108,25 @@
         (let [tp (tran-prob sp sample-size j)]
           tp)))))
 
-(defn tran-mat
+(defn left-mult-tran-mat
+  "Create a transition matrix in which the sum of values in each row is
+  equal to 1.  For multiplying a row vector with the vector on the left,
+  and the matrix on the right."
   [fit-A fit-B pop-size sample-size]
-  ;; apply fmat/transpose to make each column sum = 1:
   (fmat/mat (tran-mat-elems fit-A fit-B pop-size sample-size))) ; each row sum = 1
+
+(defn right-mult-tran-mat
+  "Create a transition matrix in which the sum of values in each column is
+  equal to 1.  For multiplying a column vector with the vector on the
+  right, and the matrix on the left."
+  [fit-A fit-B pop-size sample-size]
+  (fmat/transpose
+    (row-mult-tran-mat fit-A fit-B pop-size sample-size)))
+
 
 (comment
   (def es (tran-mat-elems 0.7 0.55 10 5))
+  (def es (tran-mat-elems 0.7 0.55 5 5))
   (count es)
   (map count es)
   (map (partial apply +) es)
@@ -101,6 +134,9 @@
   (def m2 (fmat/transpose (fmat/mat es))) ; stoch mat with each col sum = 1, i.e. for a column vector on the right
   (fmat/shape m1)
   (fmat/shape m2)
+  (fmat/mat->array2d m1)
+  (fmat/mat->array2d m2)
+  (fmat/mat->array2d (fmat/pow m2 0.001))
 
   (def initial-state (concat (repeat 5 0) [1] (repeat 5 0)))
 
@@ -124,17 +160,21 @@
   (def m0t (fmat/transpose m0))
   (fmat/shape m0t) ; a column vector
 
-  (def vm (fmat/mulm m0 m1))
+  (def vm (fmat/mulm m0 m1))  ; row vec
   (fmat/shape vm)
-  (def mv (fmat/mulm m2 m0t))
+  (def mv (fmat/mulm m2 m0t)) ; col vec
   (fmat/shape mv)
 
-  (fmat/mat->array2d mv)
-  (fmat/mat->array2d vm)
+  ;(clojure.pprint/pprint)
+
+  (fmat/mat->array2d vm) ; row vec
+  (fmat/mat->array2d mv) ; col vec
 
 )
 
 (comment
+  ;; OLD
+
   (def m (tran-mat 5 2 3 2))
   (fmat/shape m)
 ;#object[org.apache.commons.math3.linear.Array2DRowRealMatrix 0x51bf848e
