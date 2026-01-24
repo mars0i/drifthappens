@@ -95,6 +95,15 @@
          (um/irange sample-size)))
 
   (tran-probs 0.6 4.0)
+  (reduce + (tran-probs 0.6 4.0))
+  (reduce + (tran-probs 0.5 1000))
+  (fm/combinations 1025 500)
+  (tran-probs 0.4 200)
+)
+
+(defn tran-mat-elems
+  [fit-A fit-B pop-size sample-size]
+  (for [i (um/irange pop-size)]
     (let [sp (sample-prob fit-A fit-B pop-size i)]
       (for [j (um/irange sample-size)]
         (let [tp (tran-prob sp sample-size j)]
@@ -113,7 +122,7 @@
   right, and the matrix on the left."
   [fit-A fit-B pop-size sample-size]
   (fmat/transpose
-    (row-mult-tran-mat fit-A fit-B pop-size sample-size)))
+    (left-mult-tran-mat fit-A fit-B pop-size sample-size)))
 
 
 (comment
@@ -140,7 +149,7 @@
   (def s0' (fvec/make-vector 11 initial-state))
   (type s0')
 
-  (fmat/mulv m1 s0)  ; fails
+  (fmat/mulv m2 s0)  ; fails
   (fmat/vtmul s0 m1) ; fails
 
   (def s0'' (double-array initial-state))
