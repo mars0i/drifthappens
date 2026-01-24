@@ -2,8 +2,8 @@
 ;; https://generateme.github.io/fastmath/clay/vector_matrix.html#matrices
 (ns drifthappens.scratch
   (:require ;[clojure.math :as m]
-            [fastmath.vector :as v]
-            [fastmath.matrix :as mat]
+            [fastmath.vector :as fvec]
+            [fastmath.matrix :as fmat]
             [fastmath.core :as fm]
             ;[fastmath.dev.codox :as codox]
             ;[fastmath.dev.clay :as utls]
@@ -16,65 +16,113 @@
            [fastmath.matrix Mat2x2 Mat3x3 Mat4x4]))
 
 
-(def mat1 (mat/real-matrix [[1 2 3 4]
-                            [5 6 7 8]]))
+(def v2 (Vec2. -1 2.5))
+(type v2)
+(def v3 (Vec3. -1 2.5 -3.25))
+(type v3)
+(def v3' (fvec/vec3 -1 2.5 -3.25)) ; same thing as preceding
+(type v3')
+(def v4 (Vec4. -1 0.0 -3.25 4))
+(type v4)
+(def av5 (fvec/array-vec [-1 0.0 -3.25 4 -23]))
+(type av5)
+(def av4 (fvec/make-vector 4 [-1 0.0 -3.25 4 -23])) ; ignores extra elements, uses 0.0 for unprovided elements
+(type av4)
+(def av4 (fvec/make-vector 7 [-1 0.0 -3.25 4 -23])) ; ignores extra elements, uses 0.0 for unprovided elements
+fvec/generate-vec3
+fvec/array->vec3
+fvec/seq->vec3
+make-array
+(def da10 (double-array (range 10))) ; makes a Java array of doubles (?)
+(type da10)
 
-(def mat2 (mat/mat         [[1 2 3 4]
-                            [5 6 7 8]]))
 
-(def mat3 (mat/mat         [[1 2]
-                            [5 6]]))
+(def mat1 (fmat/real-matrix [[1 2 3 4]
+                             [5 6 7 8]]))
+
+(def mat2 (fmat/mat         [[1 2 3]
+                             [4 5 6]]))
+
+(def mat3 (fmat/mat         [[1 2]
+                             [5 6]]))
 (type mat1)
 (type mat2)
 (type mat3)
 
+(def colmat3 (fmat/mat [[10]
+                       [100]
+                       [1000]]))
 
-(= mat1 mat2)
+(def rowmat3 (fmat/mat [[10 100 1000]]))
 
-(mat/entry mat1 1 1)
-(mat/entry mat2 1 1)
+(def rowmat2 (fmat/mat [[10 100]]))
 
-(mat/shape mat1)
-(mat/shape mat2)
+(def da3 (double-array [10 100 1000]))
+(type da3)
+(def la3 (long-array [10 100 1000]))
+(type la3)
 
-(def mm1 (mat/mulmt mat1 mat2))
-(mat/shape mm1)
-(mat/entry mm1 1 1)
+(def v3 (fvec/vec3 10 100 1000))
 
-(def mm2 (mat/mulm mat1 (mat/transpose mat2)))
-(mat/shape mm2)
-(mat/entry mm2 1 1)
+(fmat/mulm mat2 colmat3)
+(fmat/mulm rowmat2 mat2)
 
-(def mm3 (mat/mulm (mat/transpose mat1) mat2))
-(mat/shape mm3)
-(mat/entry mm3 1 1)
-(mat/entry mm3 3 3)
-
-(fm/combinations 4 2)
+;(fmat/mulv mat2 colmat3) ; fails
+;(fmat/mulv mat2 rowmat3) ; fails
+(fmat/mulv mat2 da3) ; succeeds
+;(fmat/mulv mat2 la3) ; fails
+;(fmat/mulv mat2 v3) ; fails
+;; So it seems that mulv only works when the vector is represented by a Java double array.
 
 
-;; ---
+;; Definitions from https://generateme.github.io/fastmath/clay/vector_matrix.html#matrices
+(def M2x2 (Mat2x2. 1 2 3 4))
+(type M2x2)
+(def M3x3 (Mat3x3. 1 2 3 -4 5 6 9 -8 7))
+(type M3x3)
+(def M4x4 (Mat4x4. 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16))
+(type M4x4)
+(def RealMat (mat/real-matrix [[1 2 3] [4 5 6]]))
+(type RealMat)
 
-(defn sample-prob
-  [fit-A fit-B pop-size freq-A]
-  (let [freq-B (- pop-size freq-A)
-        overall-fit-A (* freq-A fit-A)
-        overall-fit-B (* freq-B fit-B)
-        total-fit (+ overall-fit-A overall-fit-B)]
-    (/ overall-fit-A total-fit)))
+;; Note that row representations are treated as column vectors here:
+(mat/mulv M2x2 (fvec/vec2 10 20))
+(type (mat/mulv M2x2 (fvec/vec2 10 20)))
+(mat/vtmul M2x2 (fvec/vec2 10 20))
+;; NOTE PRECEDING: It reps mult on the left by the vec, on right by mat, 
+;; but the vec arg is on the right, and is treated as a col vec that will
+;; be transposed into a row vec.
 
-(defn tran-prob
-  [sample-prob-A sample-prob-B sample-size num-A]
-  (let [num-B (- sample-size num-A)]
-    (* (fm/combinations sample-size num-A)
-       (fm/pow sample-prob-A num-A)
-       (fm/pow sample-prob-B num-B))))
+;(mat/mulv RealMat (fvec/vec3 1 2 3)) ; fails
+(mat/mulv RealMat (fvec/vec->RealVector (fvec/vec3 1 2 3)))
+(mat/mulv RealMat (fvec/vec->RealVector (range 1 4)))
+(type (mat/mulv RealMat (fvec/vec->RealVector (fvec/vec3 1 2 3))))
+(type (fvec/vec->RealVector (fvec/vec3 1 2 3)))
+(type (mat/mulv RealMat (fvec/vec->RealVector (range 1 4))))
 
-(defn tran-mat
-  [fit-A fit-B pop-size sample-size]
-  (let [pop-idxs (misc/irange pop-size)
-        sample-idxs (misc/irange sample-size)
-        sample-probs (map (partial sample-prob fit-A fit-B pop-size) pop-idxs) ; ???
-        tran-probs (map identity sample-idxs)] ; FIXME
-    ))
+(mat/vtmul RealMat (fvec/vec->RealVector [1 2])) 
 
+(def rv2 (fvec/vec->RealVector [10 100]))
+(def rv3 (fvec/vec->RealVector [10 100 1000]))
+(def da2 (double-array [10 100]))
+(def da3 (double-array [10 100 1000]))
+
+(def av2 (fvec/array-vec [10 100]))
+(def av3 (fvec/array-vec [10 100 1000]))
+(type av3)
+
+(fmat/mulv mat2 rv3)   ; works correctly
+(fmat/mulv mat2 da3)   ; works correctly
+(fmat/vtmul mat2 rv2)  ; works correctly. See note above about semantics of vtmul.
+(fmat/vtmul mat2 da2)  ; works correctly.
+;(fmat/mulv mat2 av3)   ; fails
+;(fmat/vtmul mat2 av2)  ; fails
+;; SUMMARY:
+;; Fastmath vector/matrix mult works only with apache RealVector and Java double arrays.
+;; It doesn't work with other arbitrary-length fastmath vector
+;; representations such as fastmath.vector.ArrayVec (in fastmath 3.0.0-alpha, at least)
+
+;; btw:
+;; fvec/seq->RealVector ;; doesn't exist
+(def rv3' (fvec/vec->RealVector (list 10 100 1000))) ; succeeds but I think the result is wrong
+(def rv3'' (fvec/vec->RealVector (map identity (list 10 100 1000)))) ; succeeds but I think the result is wrong
