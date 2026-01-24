@@ -111,15 +111,15 @@
 
 (defn left-mult-tran-mat
   "Create a transition matrix in which the sum of values in each row is
-  equal to 1.  For multiplying a row vector with the vector on the left,
-  and the matrix on the right."
+  equal to 1.  Use this to multiply a row vector with the vector on the
+  left and the matrix on the right."
   [fit-A fit-B pop-size sample-size]
   (fmat/mat (tran-mat-elems fit-A fit-B pop-size sample-size))) ; each row sum = 1
 
 (defn right-mult-tran-mat
   "Create a transition matrix in which the sum of values in each column is
-  equal to 1.  For multiplying a column vector with the vector on the
-  right, and the matrix on the left."
+  equal to 1.  Use this to multiply a column vector with the vector on the
+  right and the matrix on the left."
   [fit-A fit-B pop-size sample-size]
   (fmat/transpose
     (left-mult-tran-mat fit-A fit-B pop-size sample-size)))
