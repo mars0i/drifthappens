@@ -30,6 +30,8 @@
 
 ;; ---
 
+;; ---
+
 
 (defn mpow
   "Multiply a square matrix by itself n times."
@@ -44,7 +46,6 @@
 (comment
   (def unit (fmat/mat [[2]]))
   (fmat/mat->array2d unit) ; row vec
-  (fmat/mat->array2d (mpow unit 4))
 )
 
 ;; ---
@@ -94,15 +95,6 @@
          (um/irange sample-size)))
 
   (tran-probs 0.6 4.0)
-  (reduce + (tran-probs 0.6 4.0))
-  (reduce + (tran-probs 0.5 1000))
-  (fm/combinations 1025 500)
-  (tran-probs 0.4 200)
-)
-
-(defn tran-mat-elems
-  [fit-A fit-B pop-size sample-size]
-  (for [i (um/irange pop-size)]
     (let [sp (sample-prob fit-A fit-B pop-size i)]
       (for [j (um/irange sample-size)]
         (let [tp (tran-prob sp sample-size j)]
@@ -126,7 +118,6 @@
 
 (comment
   (def es (tran-mat-elems 0.7 0.55 10 5))
-  (def es (tran-mat-elems 0.7 0.55 5 5))
   (count es)
   (map count es)
   (map (partial apply +) es)
@@ -142,11 +133,14 @@
 
   (def s0 (fvec/array-vec initial-state))
   (type s0)
+  (vec s0)
+  (seq s0)
+
   ;; another way to do the same thing:
   (def s0' (fvec/make-vector 11 initial-state))
   (type s0')
 
-  (fmat/mulv m2 s0)  ; fails
+  (fmat/mulv m1 s0)  ; fails
   (fmat/vtmul s0 m1) ; fails
 
   (def s0'' (double-array initial-state))
@@ -170,6 +164,15 @@
   (fmat/mat->array2d vm) ; row vec
   (fmat/mat->array2d mv) ; col vec
 
+)
+
+(comment
+  (def av (fvec/array-vec [1 2 3 4 5 7]))
+  (type av)
+  (seq av)
+  (type (seq av))
+  (vec av)
+  (type (vec av))
 )
 
 (comment
