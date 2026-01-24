@@ -113,6 +113,12 @@
   (fmat/mulv m2 s0)  ; fails
   (fmat/vtmul s0 m1) ; fails
 
+  (def s0'' (double-array initial-state))
+  (type s0'')
+  (count s0'')
+  (fmat/mulv m2 s0'')  ; works
+  (apply + (fmat/mulv m2 s0'')) ; => 1.0
+
   (def m0 (fmat/mat (vector initial-state))) ; a row vector
   (fmat/shape m0)
   (def m0t (fmat/transpose m0))
