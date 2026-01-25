@@ -1,6 +1,6 @@
 ;; Initial ns statement copied from
 ;; https://generateme.github.io/fastmath/clay/vector_matrix.html#matrices
-(ns drifthappens.scratch
+(ns scratch
   (:require ;[clojure.math :as m]
             [fastmath.vector :as fvec]
             [fastmath.matrix :as fmat]
@@ -82,40 +82,40 @@ make-array
 (type M3x3)
 (def M4x4 (Mat4x4. 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16))
 (type M4x4)
-(def RealMat (mat/real-matrix [[1 2 3] [4 5 6]]))
+(def RealMat (fmat/real-matrix [[1 2 3] [4 5 6]]))
 (type RealMat)
 
 ;; Note that row representations are treated as column vectors here:
-(mat/mulv M2x2 (fvec/vec2 10 20))
-(type (mat/mulv M2x2 (fvec/vec2 10 20)))
-(mat/vtmul M2x2 (fvec/vec2 10 20))
+(fmat/mulv M2x2 (fvec/vec2 10 20))
+(type (fmat/mulv M2x2 (fvec/vec2 10 20)))
+(fmat/vtmul M2x2 (fvec/vec2 10 20))
 ;; NOTE PRECEDING: It reps mult on the left by the vec, on right by mat, 
 ;; but the vec arg is on the right, and is treated as a col vec that will
 ;; be transposed into a row vec.
 
-;(mat/mulv RealMat (fvec/vec3 1 2 3)) ; fails
-(mat/mulv RealMat (fvec/vec->RealVector (fvec/vec3 1 2 3)))
-(mat/mulv RealMat (fvec/vec->RealVector (range 1 4)))
-(type (mat/mulv RealMat (fvec/vec->RealVector (fvec/vec3 1 2 3))))
+;(fmat/mulv RealMat (fvec/vec3 1 2 3)) ; fails
+(fmat/mulv RealMat (fvec/vec->RealVector (fvec/vec3 1 2 3)))
+(fmat/mulv RealMat (fvec/vec->RealVector (range 1 4)))
+(type (fmat/mulv RealMat (fvec/vec->RealVector (fvec/vec3 1 2 3))))
 (type (fvec/vec->RealVector (fvec/vec3 1 2 3)))
-(type (mat/mulv RealMat (fvec/vec->RealVector (range 1 4))))
+(type (fmat/mulv RealMat (fvec/vec->RealVector (range 1 4))))
 
-(mat/vtmul RealMat (fvec/vec->RealVector [1 2])) 
+(fmat/vtmul RealMat (fvec/vec->RealVector [1 2])) 
 
-(def rv2 (fvec/vec->RealVector [10 100]))
-(def rv3 (fvec/vec->RealVector [10 100 1000]))
-(def da2 (double-array [10 100]))
-(def da3 (double-array [10 100 1000]))
+(def rv2 (fvec/vec->RealVector [10 100])) ; not seq-able
+(def rv3 (fvec/vec->RealVector [10 100 1000])) ; not seq-able
+(def da2 (double-array [10 100])) ; seq-able
+(def da3 (double-array [10 100 1000])) ; seq-able
 
-(def av2 (fvec/array-vec [10 100]))
-(def av3 (fvec/array-vec [10 100 1000]))
+(def av2 (fvec/array-vec [10 100])) ; seq-able
+(def av3 (fvec/array-vec [10 100 1000])) ; seq-able
 (type av3)
 
 (fmat/mulv mat2 rv3)   ; works correctly
 (fmat/mulv mat2 da3)   ; works correctly
+;(fmat/mulv mat2 av3)   ; fails
 (fmat/vtmul mat2 rv2)  ; works correctly. See note above about semantics of vtmul.
 (fmat/vtmul mat2 da2)  ; works correctly.
-;(fmat/mulv mat2 av3)   ; fails
 ;(fmat/vtmul mat2 av2)  ; fails
 ;; SUMMARY:
 ;; Fastmath vector/matrix mult works only with apache RealVector and Java double arrays.
