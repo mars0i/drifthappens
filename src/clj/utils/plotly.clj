@@ -93,33 +93,3 @@
   possible values."
   [plot i dashed]
   (assoc-in plot [:data i :line :dash] dashed))
-
-;(defn next-iter-seg
-;  [f x]
-;  {:x [x x]
-;   :y [x (f x)]})
-
-(defn next-vert-seg
-  "ADD DOCSTRING"
-  [[x next-x]]
-  {:x [x x]
-   :y [x next-x]})
-
-;; We only construct vertical segments explicitly; by chaining
-;; these together, the lines that connect them are the horizontal
-;; segments.
-;; re name see https://en.wikipedia.org/wiki/Cobweb_plot
-(defn cobweb-dataset
-  "ADD DOCSTRING"
-  [init-x iters catkey catval f]
-  (->> (iterate f init-x)
-       (take iters)
-       (partition 2 1)
-       (map next-vert-seg)
-       (apply merge-with into)
-       (#(assoc % catkey catval)) ; since threading last
-       tc/dataset))
-
-(comment
-  (cobweb 0.75 5 :fun "ya" (um/normalized-ricker 2.7))
-)
