@@ -30,20 +30,43 @@
 
 ;; ---
 
-;; ---
-
-
+;; TODO ? This could be made more efficient for large powers by
+;; computing half the power and then multiplying the result
+;; by itself. cf. owl_linalg_generic.ml in the OCaml Owl lib.
 (defn mpow
   "Multiply a square matrix by itself n times."
   [m n]
-  (loop [acc-mat m
-         i 1]
-    (if (= i n)
-      acc-mat
-      (recur (fmat/mulm m acc-mat)
-             (inc i)))))
+  (if (or (<= n 0) (not (== (rem n 1) 0)))
+    (do (print "mpow only accepts positive integer powers.")
+        nil) ; or throw?
+    (loop [i 1, acc-mat m]
+      (if (= i n)
+        acc-mat
+        (recur (inc i)
+               (fmat/mulm m acc-mat))))))
 
 (comment
+
+  (fvec/pow [1 2 3] 2)
+
+  (== 0 0.0 0N 0M 0/1)
+
+  (def m42 (fmat/mat [[2 3]
+                      [4 5]]))
+
+  (fmat/mulm m42 m42) ; {{16.0,21.0},{28.0,37.0}}"]
+  (fmat/mulm m42 (fmat/mulm m42 m42)) ; {{116.0,153.0},{204.0,269.0}}"]
+  (fmat/mulm m42 
+             (fmat/mulm m42
+                        (fmat/mulm m42 m42))) ; {{844.0,1113.0},{1484.0,1957.0}}"]
+  (mpow m42 0)
+  (mpow m42 -1)
+  (mpow m42 1.00002)
+  (mpow m42 1)
+  (mpow m42 2)
+  (mpow m42 3)
+  (mpow m42 4)
+
   (def unit (fmat/mat [[2]]))
   (fmat/mat->array2d unit) ; row vec
 )
