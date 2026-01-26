@@ -11,6 +11,43 @@
 
 (def plot-steps 400)
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; CONVENIENCE PLOTTING FUNCTIONS
+
+(defn plot-lines
+  "Plot lines connecting values in ys as y values with x representing the
+  index of the element in ys.  Lines are drawn from point to point."
+  [ys]
+  (-> (tc/dataset {:x (range (count ys))
+                   :y ys})
+        (plotly/layer-line  {:=x :x, :=y, :y});)
+      plotly/plot
+      (assoc-in [:data 0 :line :width] 1)))
+
+(defn plot-dots
+  "Plot values in ys with dots t as y values with x representing the
+  index of the element in ys."
+  [ys]
+  (-> (tc/dataset {:x (range (count ys))
+                   :y ys})
+        (plotly/layer-point {:=x :x, :=y, :y});)
+      plotly/plot
+      (assoc-in [:data 0 :line :width] 1)))
+
+(defn plot-both
+  "Plot lines connecting values in ys as y values with x representing the
+  index of the element in ys.  Dots are plotted for poijnts, and lines are
+  drawn from point to point."
+  [ys]
+  (-> (tc/dataset {:x (range (count ys))
+                   :y ys})
+        (plotly/layer-line  {:=x :x, :=y, :y});)
+        (plotly/layer-point {:=x :x, :=y, :y});)
+      plotly/plot
+      (assoc-in [:data 0 :line :width] 1)))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
 (defn assoc-into-trace
   "Given a Plotly plot EDN, and an index for one of its traces (i.e. one of
   the maps in the vector that's the value of :data), Uses assoc-in to add
