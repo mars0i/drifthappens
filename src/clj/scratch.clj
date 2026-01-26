@@ -15,14 +15,31 @@
            [fastmath.matrix Mat2x2 Mat3x3 Mat4x4]))
 
 
+;; ??: 
+;;  <groupId>org.apache.commons</groupId>
+;;     <artifactId>commons-math3</artifactId>
+;;     <version>3.6.1</version>
+;; </dependency>
+;; 
+;; Once set up, we can use the RealMatrix interface and its
+;; Array2DRowRealMatrix implementation to create our usual matrices.
+;; The constructor of the implementation class takes a
+;; two-dimensional double array as its parameter:
+;; 
+;; RealMatrix matrix = new Array2DRowRealMatrix(/* a two dimensions double array */);
 
-    (def init-freqs (wf/mkvec (concat (repeat 500 0.0) [1.0] (repeat 500 0.0))))
-    (def upmat (wf/right-mult-tran-mat 0.95 1.0 (dec (count init-freqs))))
-    (def upmat2 (wf/mpow upmat 2))
-    (def upmat4 (wf/mpow upmat2 2))
-    (def upmat16 (wf/mpow upmat4 2))
-    (def upmat256 (wf/mpow upmat16 2))
-    (def upmat65K (wf/mpow upmat256 2))
+;; https://commons.apache.org/proper/commons-math/javadocs/api-3.6.1/org/apache/commons/math3/linear/Array2DRowRealMatrix.html
+;; https://commons.apache.org/proper/commons-math/javadocs/api-3.6.1/org/apache/commons/math3/linear/AbstractRealMatrix.html
+
+
+(def init-freqs (wf/mkvec (concat (repeat 500 0.0) [1.0] (repeat 500 0.0))))
+(def upmat (wf/right-mult-tran-mat 0.95 1.0 (dec (count init-freqs))))
+(type upmat)
+(def upmat2 (wf/mpow upmat 2))
+(def upmat4 (wf/mpow upmat2 2))
+(def upmat16 (wf/mpow upmat4 2))
+(def upmat256 (wf/mpow upmat16 2))
+(def upmat65K (wf/mpow upmat256 2))
 
 ;(comment
     (up/plot-lines init-freqs)
