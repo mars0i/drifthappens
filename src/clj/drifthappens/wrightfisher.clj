@@ -42,6 +42,7 @@
 ;; TODO ? This could be made more efficient for large powers by
 ;; computing half the power and then multiplying the result
 ;; by itself. cf. owl_linalg_generic.ml in the OCaml Owl lib.
+;; TODO Move somewhere else.
 (defn mpow
   "Multiply a square matrix by itself n times."
   [m n]
