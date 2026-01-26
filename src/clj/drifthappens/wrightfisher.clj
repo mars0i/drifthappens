@@ -22,28 +22,61 @@
             ;[fastmath.dev.ggplot :as gg]
             ;[fastmath.stats :as stats]
             [scicloj.kindly.v4.kind :as kind]
-            [tablecloth.api :as tc]
             [scicloj.tableplot.v1.plotly :as plotly]
+            [tablecloth.api :as tc]
             [utils.misc :as um])
   (:import [fastmath.vector ArrayVec Vec2 Vec3 Vec4]
            [fastmath.matrix Mat2x2 Mat3x3 Mat4x4]))
 
 ;; ---
 
-;; ---
 
+;; generateme/fastmath supports a variety of different vector and
+;; matrix representations, but they don't all have the same conveniences
+;; and don't necessarily work with the multiplication operators.
+;; These are aliases for the current best choice for me.  See
+;; https://clojurians.zulipchat.com/#narrow/channel/151924-data-science/topic/Matrix-vector.20multiplication.20in.20fastmath/near/569973078
+(def mkvec double-array)
+(def mkmat fm/seq->double-double-array)
 
+;; TODO ? This could be made more efficient for large powers by
+;; computing half the power and then multiplying the result
+;; by itself. cf. owl_linalg_generic.ml in the OCaml Owl lib.
+;; TODO Move somewhere else.
 (defn mpow
   "Multiply a square matrix by itself n times."
   [m n]
-  (loop [acc-mat m
-         i 1]
-    (if (= i n)
-      acc-mat
-      (recur (fmat/mulm m acc-mat)
-             (inc i)))))
+  (if (or (<= n 0) (not (== (rem n 1) 0)))
+    (do (print "mpow only accepts positive integer powers.")
+        nil) ; or throw?
+    (loop [i 1, acc-mat m]
+      (if (= i n)
+        acc-mat
+        (recur (inc i)
+               (fmat/mulm m acc-mat))))))
 
 (comment
+
+  (fvec/pow [1 2 3] 2)
+
+  (== 0 0.0 0N 0M 0/1)
+
+  (def m42 (fmat/mat [[2 3]
+                      [4 5]]))
+
+  (fmat/mulm m42 m42) ; {{16.0,21.0},{28.0,37.0}}"]
+  (fmat/mulm m42 (fmat/mulm m42 m42)) ; {{116.0,153.0},{204.0,269.0}}"]
+  (fmat/mulm m42 
+             (fmat/mulm m42
+                        (fmat/mulm m42 m42))) ; {{844.0,1113.0},{1484.0,1957.0}}"]
+  (mpow m42 0)
+  (mpow m42 -1)
+  (mpow m42 1.00002)
+  (mpow m42 1)
+  (mpow m42 2)
+  (mpow m42 3)
+  (mpow m42 4)
+
   (def unit (fmat/mat [[2]]))
   (fmat/mat->array2d unit) ; row vec
 )
@@ -113,16 +146,20 @@
   "Create a transition matrix in which the sum of values in each row is
   equal to 1.  Use this to multiply a row vector with the vector on the
   left and the matrix on the right."
-  [fit-A fit-B pop-size sample-size]
-  (fmat/mat (tran-mat-elems fit-A fit-B pop-size sample-size))) ; each row sum = 1
+  ([fit-A fit-B pop-size]
+   (left-mult-tran-mat fit-A fit-B pop-size pop-size))
+  ([fit-A fit-B pop-size sample-size]
+   (mkmat (tran-mat-elems fit-A fit-B pop-size sample-size)))) ; each row sum = 1
 
 (defn right-mult-tran-mat
   "Create a transition matrix in which the sum of values in each column is
   equal to 1.  Use this to multiply a column vector with the vector on the
   right and the matrix on the left."
-  [fit-A fit-B pop-size sample-size]
-  (fmat/transpose
-    (left-mult-tran-mat fit-A fit-B pop-size sample-size)))
+  ([fit-A fit-B pop-size]
+   (right-mult-tran-mat fit-A fit-B pop-size pop-size))
+  ([fit-A fit-B pop-size sample-size]
+   (fmat/transpose
+     (left-mult-tran-mat fit-A fit-B pop-size sample-size))))
 
 
 (comment
