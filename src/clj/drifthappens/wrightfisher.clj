@@ -22,13 +22,22 @@
             ;[fastmath.dev.ggplot :as gg]
             ;[fastmath.stats :as stats]
             [scicloj.kindly.v4.kind :as kind]
-            [tablecloth.api :as tc]
             [scicloj.tableplot.v1.plotly :as plotly]
+            [tablecloth.api :as tc]
             [utils.misc :as um])
   (:import [fastmath.vector ArrayVec Vec2 Vec3 Vec4]
            [fastmath.matrix Mat2x2 Mat3x3 Mat4x4]))
 
 ;; ---
+
+
+;; generateme/fastmath supports a variety of different vector and
+;; matrix representations, but they don't all have the same conveniences
+;; and don't necessarily work with the multiplication operators.
+;; These are aliases for the current best choice for me.  See
+;; https://clojurians.zulipchat.com/#narrow/channel/151924-data-science/topic/Matrix-vector.20multiplication.20in.20fastmath/near/569973078
+(def mkvec double-array)
+(def mkmat fm/seq->double-double-array)
 
 ;; TODO ? This could be made more efficient for large powers by
 ;; computing half the power and then multiplying the result
@@ -136,16 +145,20 @@
   "Create a transition matrix in which the sum of values in each row is
   equal to 1.  Use this to multiply a row vector with the vector on the
   left and the matrix on the right."
-  [fit-A fit-B pop-size sample-size]
-  (fmat/mat (tran-mat-elems fit-A fit-B pop-size sample-size))) ; each row sum = 1
+  ([fit-A fit-B pop-size]
+   (left-mult-tran-mat fit-A fit-B pop-size pop-size))
+  ([fit-A fit-B pop-size sample-size]
+   (mkmat (tran-mat-elems fit-A fit-B pop-size sample-size)))) ; each row sum = 1
 
 (defn right-mult-tran-mat
   "Create a transition matrix in which the sum of values in each column is
   equal to 1.  Use this to multiply a column vector with the vector on the
   right and the matrix on the left."
-  [fit-A fit-B pop-size sample-size]
-  (fmat/transpose
-    (left-mult-tran-mat fit-A fit-B pop-size sample-size)))
+  ([fit-A fit-B pop-size]
+   (right-mult-tran-mat fit-A fit-B pop-size pop-size))
+  ([fit-A fit-B pop-size sample-size]
+   (fmat/transpose
+     (left-mult-tran-mat fit-A fit-B pop-size sample-size))))
 
 
 (comment
