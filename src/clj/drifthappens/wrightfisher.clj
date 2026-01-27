@@ -24,7 +24,7 @@
             [scicloj.kindly.v4.kind :as kind]
             [scicloj.tableplot.v1.plotly :as plotly]
             [tablecloth.api :as tc]
-            [utils.misc :as um])
+            [utils.misc :as umisc])
   (:import [fastmath.vector ArrayVec Vec2 Vec3 Vec4]
            [fastmath.matrix Mat2x2 Mat3x3 Mat4x4]))
 
@@ -38,22 +38,6 @@
 ;; https://clojurians.zulipchat.com/#narrow/channel/151924-data-science/topic/Matrix-vector.20multiplication.20in.20fastmath/near/569973078
 (def mkvec double-array)
 (def mkmat fm/seq->double-double-array)
-
-;; TODO ? This could be made more efficient for large powers by
-;; computing half the power and then multiplying the result
-;; by itself. cf. owl_linalg_generic.ml in the OCaml Owl lib.
-;; TODO Move somewhere else.
-(defn mpow
-  "Multiply a square matrix by itself n times."
-  [m n]
-  (if (or (<= n 0) (not (== (rem n 1) 0)))
-    (do (print "mpow only accepts positive integer powers.")
-        nil) ; or throw?
-    (loop [i 1, acc-mat m]
-      (if (= i n)
-        acc-mat
-        (recur (inc i)
-               (fmat/mulm m acc-mat))))))
 
 (comment
 
@@ -125,7 +109,7 @@
     between 0 and sample-size.  (Summing them should be very close to 1.)"
     [sample-prob-A sample-size]
     (map (partial tran-prob sample-prob-A sample-size)
-         (um/irange sample-size)))
+         (umisc/irange sample-size)))
 
   (tran-probs 0.6 4.0)
   (reduce + (tran-probs 0.6 4.0))
@@ -136,9 +120,9 @@
 
 (defn tran-mat-elems
   [fit-A fit-B pop-size sample-size]
-  (for [i (um/irange pop-size)]
+  (for [i (umisc/irange pop-size)]
     (let [sp (sample-prob fit-A fit-B pop-size i)]
-      (for [j (um/irange sample-size)]
+      (for [j (umisc/irange sample-size)]
         (let [tp (tran-prob sp sample-size j)]
           tp)))))
 
