@@ -3,16 +3,16 @@
             [fastmath.matrix :as fmat]
             [fastmath.core :as fm]))
 
-;; faster for larger m and n
-;; uses mutual recursion, but number of calls is O(log2 n)
+;; Fewer multiplications. Faster for larger m and n than simpler version.
+;; Uses mutual recursion, but stack depth is O(log2 n).
 (defn mpow
   "Multiplies a square matrix by itself n times.  n must be a positive
-  integer or a positive float with no fractional part."
+  integer or positive floating-point number with no fractional part."
   [m n]
   (let [[h w] (fmat/shape m)]
-    (cond (not= h w) (do (print (str "mpow only multiplies square matrices; shape is [" h " " w "].")) nil) ; or throw?
-          (or (<= n 0) (not (== (rem n 1) 0)))
-          (do (print "mpow only accepts positive integer powers.") nil) ; or throw?
+    (cond (not= h w) (do (print (str "mpow only multiplies square matrices. Matrix shape was [" h " " w "].")) nil) ; or throw?
+          (or (<= n 0)
+              (not (zero? (rem n 1))) (do (print (str "mpow only accepts positive integer powers. Exponent was " n)) nil) ; or throw?
           :else (letfn [(either-pow [acc-mat k]
                           (cond (= k 1) acc-mat
                                 (even? k) (even-pow acc-mat k)
@@ -22,7 +22,7 @@
                             (fmat/mulm acc-mat-part acc-mat-part)))]
                   (either-pow m (long n)))))) ; allow float integers
 
-;; tail recursive, but slow for moderately large m and n
+;; Tail recursive, but slow for moderately large m and n.
 (defn mpow-slow
   "Multiplies a square matrix by itself n times."
   [m n]
