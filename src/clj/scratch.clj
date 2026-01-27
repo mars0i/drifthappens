@@ -9,36 +9,47 @@
             [scicloj.tableplot.v1.plotly :as plotly]
             [tablecloth.api :as tc]
             [drifthappens.wrightfisher :as wf]
-            [utils.misc :as misc])
+            [utils.plotly :as uplot]
+            [utils.math :as umath]
+            [utils.misc :as umisc])
   (:import [fastmath.vector Vec2 Vec3 Vec4]
            [fastmath.matrix Mat2x2 Mat3x3 Mat4x4]))
 
+(defn make-tran-mats
+  [m expts]
+  (let [size (first (fmat/shape m))]
+    (doall
+      (cons (fmat/eye size)
+            (map (partial umath/mpow m)
+                 expts)))))
 
-(defn plot-iterates
-  "Plot lines connecting n iterates as y values with x representing number of
-  iterations.  iterates should not be infinite."
-  [iterates]
-  (-> (tc/dataset {:x (range (count iterates))
-                   :y iterates})
-      ;(plotly/base {:=width 900})
-      (plotly/layer-line {:=x :x, :=y, :y})
-      plotly/plot
-      (assoc-in [:data 0 :line :width] 1)))
+(defn make-prob-states
+  [tran-mats init-state]
+  (mapv (fn [m] (fmat/mulv m init-state))
+        tran-mats))
 
 
 ;; pop size 50 with 50% A, 50% B.
-(def init-freqs (wf/mkvec (concat (repeat 25 0.0) [1.0] (repeat 25 0.0))))
-
-(def upmat (wf/right-mult-tran-mat 0.7 0.5 50))
-
-(comment
-  (fmat/mulv upmat init-freqs)
-  (fmat/mulv (wf/mpow upmat 3) init-freqs)
+(def small-pop-init (wf/mkvec (concat (repeat 25 0.0) [1.0] (repeat 25 0.0))))
+(def small-drift-mat (wf/right-mult-tran-mat 1.0 1.0 (dec (count small-pop-init))))
+(def small-tran-mats (make-tran-mats small-drift-mat [1 5 10 15 20 25 30 35 40 45 50]))
+(def small-prob-states (make-prob-states small-tran-mats small-pop-init))
+(def small-plots (mapv uplot/plot-both small-prob-states))
 
 
-)
+;; pop size 500 with 50% A, 50% B.
+(def big-pop-init (wf/mkvec (concat (repeat 250 0.0) [1.0] (repeat 250 0.0))))
+(def big-drift-mat (wf/right-mult-tran-mat 1.0 1.0 (dec (count big-pop-init))))
+(def big-tran-mats (make-tran-mats big-drift-mat [1 5 10 15 20 25 30 35 45 50 55 60]))
+(def big-prob-states (make-prob-states big-tran-mats big-pop-init))
+(def big-plots (mapv uplot/plot-lines big-prob-states))
 
-(plot-iterates init-freqs)
-(plot-iterates (fmat/mulv upmat init-freqs))
-(plot-iterates (fmat/mulv (wf/mpow upmat 3) init-freqs))
-(plot-iterates (fmat/mulv (wf/mpow upmat 8) init-freqs))
+small-plots
+big-plots
+
+;(plotly/plot
+;  {;:layout (:layout cobweb-plot)         ; combweb s/b last:
+;   :data (vec (mapcat :data 
+;n-traces (count (:data combo-plot))] ; depends on what's in cobweb-plot
+;    (kind/fragment
+ 
