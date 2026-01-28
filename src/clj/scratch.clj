@@ -31,21 +31,43 @@
 
 ;; pop size 50 with 50% A, 50% B.
 (def small-pop-init (wf/mkvec (concat (repeat 25 0.0) [1.0] (repeat 25 0.0))))
+(comment
 (def small-drift-mat (wf/right-mult-tran-mat 1.0 1.0 (dec (count small-pop-init))))
-(def small-tran-mats (make-tran-mats small-drift-mat [1 5 10 15 20 25 30 35 40 45 50]))
+(def small-tran-mats (make-tran-mats small-drift-mat [1 5 10 15 20 25 30 35 40 45 50 55 60]))
 (def small-prob-states (make-prob-states small-tran-mats small-pop-init))
 (def small-plots (mapv uplot/plot-both small-prob-states))
+)
 
 
 ;; pop size 500 with 50% A, 50% B.
 (def big-pop-init (wf/mkvec (concat (repeat 250 0.0) [1.0] (repeat 250 0.0))))
+(comment
 (def big-drift-mat (wf/right-mult-tran-mat 1.0 1.0 (dec (count big-pop-init))))
 (def big-tran-mats (make-tran-mats big-drift-mat [1 5 10 15 20 25 30 35 45 50 55 60]))
 (def big-prob-states (make-prob-states big-tran-mats big-pop-init))
 (def big-plots (mapv uplot/plot-lines big-prob-states))
+)
 
-small-plots
-big-plots
+;small-plots
+;big-plots
+
+(def N (dec (count big-pop-init)))
+(def M 5)
+
+(def predat-drift-mat (wf/right-mult-tran-mat 1.0 1.0 N M))
+(def reprod-drift-mat (wf/right-mult-tran-mat 1.0 1.0 M N))
+(def pred-reprod-mat (fmat/mulm predat-drift-mat reprod-drift-mat))
+
+(def pred-repod-tran-mats (make-tran-mats big-drift-mat [1 5 10 15 20 25 30 35 45 50 55 60]))
+(def pred-repod-prob-states (make-prob-states big-tran-mats big-pop-init))
+(def pred-reprod-plots (mapv uplot/plot-lines big-prob-states))
+
+;pred-reprod-plots
+
+(def small-big-combo-plots (interleave small-plots big-plots pred-reprod-plots))
+
+small-big-combo-plots 
+
 
 ;(plotly/plot
 ;  {;:layout (:layout cobweb-plot)         ; combweb s/b last:
