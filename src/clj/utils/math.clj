@@ -28,24 +28,31 @@
                   (fmat/mulm factor factor)))]
         (either-pow m (long n)))))) ; allow float integers
 
-;; Tail recursive, but slow for moderately large m and n.
+;; Simple, tail recursive, but slow for moderately large m and n.
 (defn mpow-slow
-  "Multiplies a square matrix by itself n times."
+  "Multiplies a square matrix by itself n times.  n must be a positive
+  integer or positive floating-point number with no fractional part."
   [m n]
   (let [[h w] (fmat/shape m)]
-    (cond (not= h w) (do (print (str "mpow only multiplies square matrices; shape is [" h " " w "].")) nil) ; or throw?
-          (or (<= n 0) (not (== (rem n 1) 0)))
-          (do (print "mpow only accepts positive integer powers.") nil) ; or throw?
-          :else (loop [i 1, acc-mat m]
-                  (if (= i n)
-                    acc-mat
-                    (recur (inc i)
-                           (fmat/mulm m acc-mat)))))))
+    (cond 
+      (not= h w)
+      (print (str "mpow only multiplies square matrices; shape is [" h " " w "].")) ; throw?
+
+      (or (<= n 0) (not (== (rem n 1) 0)))
+      (print "mpow only accepts positive integer powers.") ; throw?
+
+      :else 
+      (loop [i 1, acc-mat m]
+        (if (= i n)
+          acc-mat
+          (recur (inc i)
+                 (fmat/mulm m acc-mat)))))))
 
 (comment
   (def m (fm/seq->double-double-array [[1 2 3][4 5 6][7 8 9]]))
   (mpow m 10)
   (mpow-slow m 10)
+  (= (mpow m 10) (mpow-slow m 10))
   (mpow m 0)
   (mpow m 0.0)
   (mpow m -2)
