@@ -85,13 +85,6 @@
         (let [tp (tran-prob sp sample-size j)]
           tp)))))
 
-(comment
-  (def tme (tran-mat-elems 1.0 1.0 1000 50))
-  (count tme) ; => 1001
-  (count (first tme)) ; => 51
-  (apply = (map count tme)) ; => true
-)
-
 (defn left-mult-tran-mat
   "Create a transition matrix in which the sum of values in each row is
   equal to 1.  Use this to multiply a row vector with the vector on the
@@ -111,3 +104,20 @@
    (fmat/transpose
      (left-mult-tran-mat fit-A fit-B pop-size sample-size))))
 
+(comment
+  (def tme (tran-mat-elems 1.0 1.0 1000 50))
+  (count tme) ; 1001
+  (count (first tme)) ; 51
+  (apply = (map count tme)) ; true
+  (def lmtmraw (mkmat tme))
+  (fmat/shape lmtmraw) ; [1001 51]
+  (def lmtm (left-mult-tran-mat 1.0 1.0 1000 50))
+  (fmat/shape lmtm) ; [1001 51]
+  (def rmtm (right-mult-tran-mat 1.0 1.0 1000 50))
+  (fmat/shape rmtm) ; [51 1001]
+  (def mult-along-51 (fmat/mulm lmtm rmtm))
+  (fmat/shape mult-along-51) ; [1001 1001]
+  (def mult-along-1001 (fmat/mulm rmtm lmtm))
+  (fmat/shape mult-along-1001)  ; [51 51]
+)
+)
