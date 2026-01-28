@@ -39,32 +39,6 @@
 (def mkvec double-array)
 (def mkmat fm/seq->double-double-array)
 
-(comment
-
-  (fvec/pow [1 2 3] 2)
-
-  (== 0 0.0 0N 0M 0/1)
-
-  (def m42 (fmat/mat [[2 3]
-                      [4 5]]))
-
-  (fmat/mulm m42 m42) ; {{16.0,21.0},{28.0,37.0}}"]
-  (fmat/mulm m42 (fmat/mulm m42 m42)) ; {{116.0,153.0},{204.0,269.0}}"]
-  (fmat/mulm m42 
-             (fmat/mulm m42
-                        (fmat/mulm m42 m42))) ; {{844.0,1113.0},{1484.0,1957.0}}"]
-  (mpow m42 0)
-  (mpow m42 -1)
-  (mpow m42 1.00002)
-  (mpow m42 1)
-  (mpow m42 2)
-  (mpow m42 3)
-  (mpow m42 4)
-
-  (def unit (fmat/mat [[2]]))
-  (fmat/mat->array2d unit) ; row vec
-)
-
 ;; ---
 
 ;; $p_i = \frac{iw_{A}}{w_{A}i + w_{B}(N-i)}\,,\,$
@@ -75,9 +49,9 @@
   the population have type A, and the fitnesses of A and B are fit-A and
   fit-B, respectively."
   [fit-A fit-B pop-size abs-freq-A]
-  (let [num-B (- pop-size abs-freq-A)
+  (let [abs-freq-B (- pop-size abs-freq-A)
         overall-fit-A (* abs-freq-A fit-A)
-        overall-fit-B (* num-B fit-B)
+        overall-fit-B (* abs-freq-B fit-B)
         total-fit (+ overall-fit-A overall-fit-B)]
     (/ overall-fit-A total-fit)))
 
@@ -98,25 +72,10 @@
   be much more than 1000--else the function will return #NaN."
   [sample-prob-A sample-size As-sampled]
   (let [sample-prob-B (- 1 sample-prob-A)
-        num-B (- sample-size As-sampled)]
+        Bs-sampled (- sample-size As-sampled)]
     (* (fm/combinations sample-size As-sampled)
        (fm/pow sample-prob-A As-sampled)
-       (fm/pow sample-prob-B num-B))))
-
-(comment
-  (defn tran-probs
-    "Create a sequence of transition probabilities for each number of A's
-    between 0 and sample-size.  (Summing them should be very close to 1.)"
-    [sample-prob-A sample-size]
-    (map (partial tran-prob sample-prob-A sample-size)
-         (umisc/irange sample-size)))
-
-  (tran-probs 0.6 4.0)
-  (reduce + (tran-probs 0.6 4.0))
-  (reduce + (tran-probs 0.5 1000))
-  (fm/combinations 1025 500)
-  (tran-probs 0.4 200)
-)
+       (fm/pow sample-prob-B Bs-sampled))))
 
 (defn tran-mat-elems
   [fit-A fit-B pop-size sample-size]
@@ -125,6 +84,13 @@
       (for [j (umisc/irange sample-size)]
         (let [tp (tran-prob sp sample-size j)]
           tp)))))
+
+(comment
+  (def tme (tran-mat-elems 1.0 1.0 1000 50))
+  (count tme) ; => 1001
+  (count (first tme)) ; => 51
+  (apply = (map count tme)) ; => true
+)
 
 (defn left-mult-tran-mat
   "Create a transition matrix in which the sum of values in each row is
