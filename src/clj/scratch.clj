@@ -39,7 +39,7 @@
 
 ;; pop size 500 with 50% A, 50% B.
 (def big-pop-init (wf/mkvec (concat (repeat 250 0.0) [1.0] (repeat 250 0.0))))
-(def big-drift-mat (wf/right-mult-tran-mat 1.0 1.0 (dec (count big-pop-init))))
+(def big-drift-mat (wf/right-mult-tran-mat 1.1 1.0 (dec (count big-pop-init))))
 (def big-tran-mats (make-tran-mats big-drift-mat [1 5 10 15 20 25 30 35 45 50 55 60]))
 (def big-prob-states (make-prob-states big-tran-mats big-pop-init))
 (def big-plots (mapv uplot/plot-lines big-prob-states))
