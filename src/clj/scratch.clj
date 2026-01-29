@@ -31,14 +31,22 @@
 (def big-fit-A 1.05)   ; large size has sel
 (def small-fit-A 1.0) ; small size is pure drift
 (def fit-B 1.0)
-(def generations [1 5 10 15 20 25 30 35 40 45 50 55 60])
-(def double-generations (cons 1 (map (partial * 2) (rest generations))))
+(def increments (iterate (partial + 8) 0))
+(def generations (map inc increments))
+(def half-generations (map (fn [n] (inc (/ n 2))) increments))
+(comment
+  (take 10 increments)
+  (take 10 generations)
+  (take 10 half-generations)
+)
 
 
-;; pop size 50 with 50% A, 50% B.
-(def small-pop-init (wf/mkvec (concat (repeat 25 0.0) [1.0] (repeat 25 0.0))))
+(def num-gens 20)
+
+;; pop size 25 with 50% A, 50% B.
+(def small-pop-init (wf/mkvec (concat (repeat 12 0.0) [1.0] (repeat 12 0.0))))
 (def small-drift-mat (wf/right-mult-tran-mat small-fit-A fit-B (dec (count small-pop-init))))
-(def small-tran-mats (make-tran-mats small-drift-mat generations))
+(def small-tran-mats (make-tran-mats small-drift-mat (take num-gens generations)))
 (def small-prob-states (make-prob-states small-tran-mats small-pop-init))
 (def small-plots (mapv uplot/plot-both small-prob-states))
 
@@ -46,7 +54,7 @@
 ;; pop size 500 with 50% A, 50% B.
 (def big-pop-init (wf/mkvec (concat (repeat 250 0.0) [1.0] (repeat 250 0.0))))
 (def big-drift-mat (wf/right-mult-tran-mat big-fit-A fit-B (dec (count big-pop-init)))) ; use fit-B for fit-A to make them equal
-(def big-tran-mats (make-tran-mats big-drift-mat generations))
+(def big-tran-mats (make-tran-mats big-drift-mat (take num-gens generations)))
 (def big-prob-states (make-prob-states big-tran-mats big-pop-init))
 (def big-plots (mapv uplot/plot-lines big-prob-states))
 
@@ -63,7 +71,10 @@
 ;; Combine into one square matrix:
 (def pred-reprod-mat (fmat/mulm reprod-drift-mat predat-drift-mat))
 
-(def pred-reprod-tran-mats (make-tran-mats pred-reprod-mat generations))
+;; We use half-generations here because each step involves two sampling
+;; processes.  So each generation is analogous to two generations in the
+;; small and big models.
+(def pred-reprod-tran-mats (make-tran-mats pred-reprod-mat (take num-gens half-generations)))
 (def pred-reprod-prob-states (make-prob-states pred-reprod-tran-mats big-pop-init))
 (def pred-reprod-plots (mapv uplot/plot-both pred-reprod-prob-states))
 
