@@ -120,4 +120,3 @@
   (def mult-along-1001 (fmat/mulm rmtm lmtm))
   (fmat/shape mult-along-1001)  ; [51 51]
 )
-)
