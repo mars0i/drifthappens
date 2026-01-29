@@ -14,17 +14,21 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; CONVENIENCE PLOTTING FUNCTIONS
 
+;; One way to add a label before a plot:
+;  (kind/fragment
+;    [(kind/md "Yow!")
+;     ;plotly stuff here
+;     ])
+
 (defn plot-lines
   "Plot lines connecting values in ys as y values with x representing the
   index of the element in ys.  Lines are drawn from point to point."
   [ys]
-  (kind/fragment
-    [(kind/md "Yow!")
-     (-> (tc/dataset {:x (range (count ys))
-                      :y ys})
-         (plotly/layer-line  {:=x :x, :=y, :y})
-         plotly/plot
-         (assoc-in [:data 0 :line :width] 1))]))
+  (-> (tc/dataset {:x (range (count ys))
+                   :y ys})
+      (plotly/layer-line  {:=x :x, :=y, :y})
+      plotly/plot
+      (assoc-in [:data 0 :line :width] 1)))
 
 (defn plot-dots
   "Plot values in ys with dots t as y values with x representing the
