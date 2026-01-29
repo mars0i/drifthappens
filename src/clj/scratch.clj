@@ -48,13 +48,22 @@
 ;big-plots
 
 (def N (dec (count big-pop-init)))
-(def M 5)
+(def M (dec (count small-pop-init)))
 
 (def predat-drift-mat (wf/right-mult-tran-mat 1.0 1.0 N M))
 (def reprod-drift-mat (wf/right-mult-tran-mat 1.0 1.0 M N))
-(def pred-reprod-mat (fmat/mulm predat-drift-mat reprod-drift-mat))
+(def pred-reprod-mat (fmat/mulm reprod-drift-mat predat-drift-mat))
 
 (def pred-reprod-tran-mats (make-tran-mats pred-reprod-mat [1 5 10 15 20 25 30 35 45 50 55 60]))
+(def pred-reprod-prob-states (make-prob-states pred-reprod-tran-mats big-pop-init))
+(def pred-reprod-plots (mapv uplot/plot-both pred-reprod-prob-states))
+
+;pred-reprod-plots
+
+(def small-big-combo-plots (interleave small-plots big-plots pred-reprod-plots))
+
+small-big-combo-plots 
+
 
 (comment
   (fmat/shape predat-drift-mat)
@@ -62,12 +71,3 @@
   (fmat/shape pred-reprod-mat)
   (map fmat/shape pred-reprod-tran-mats)
 )
-
-(def pred-reprod-prob-states (make-prob-states big-tran-mats big-pop-init))
-(def pred-reprod-plots (mapv uplot/plot-lines big-prob-states))
-
-;pred-reprod-plots
-
-(def small-big-combo-plots (interleave small-plots big-plots pred-reprod-plots))
-
-small-big-combo-plots 
