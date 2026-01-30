@@ -131,6 +131,14 @@
         (let [tp (tran-prob sp sample-size j)]
           tp)))))
 
+(comment
+  (def dim 1000)
+  (def m1 (mapv vec (tran-mat-elems 1.1 1.0 dim dim)))
+  (def m2 (mapv vec (tran-mat-elems-old 1.1 1.0 dim dim)))
+  (apply max (for [i (range dim), j (range dim)]
+               (- ((m1 i) j) ((m2 i) j))))
+)
+
 (defn left-mult-tran-mat
   "Create a transition matrix in which the sum of values in each row is
   equal to 1.  Use this to multiply a row vector with the vector on the
