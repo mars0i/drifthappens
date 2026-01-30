@@ -54,10 +54,7 @@
   products previously produced."
   [m expts]
   (let [size (first (fmat/shape m))]
-    (doall
-      (cons (fmat/eye size)
-            (map (partial mpow m)
-                 expts)))))
+    (map (partial mpow m) expts)))
 
 (defn mat-powers
   "Returns a lazy sequence of powers of a square matrixm, beginning with
@@ -78,5 +75,32 @@
   (mpow m 2.0) ; should succeed
   (def m1 (fm/seq->double-double-array [[1 2 3][4 5 6]]))
   (mpow m1 2)
+
+  (mpow m 4)
+  (mpow m 5)
+  (make-mat-powers m [1 4 5])
+  (def ms (mat-powers m))
+  (take 8 m)
+
+  (def m (fm/seq->double-double-array [[1 2 3][4 5 6][7 8 9]]))
+  (def I (fmat/eye 3))
+  (fmat/mulm I m)
+  ; eval (effective-root-form): (fmat/mulm I m)
+  ; (err) Execution error (ClassCastException) at fastmath.matrix.Mat3x3/mulm (matrix.clj:313).
+  ; (err) class [[D cannot be cast to class fastmath.matrix.Mat3x3 ([[D is in module java.base of loader 'bootstrap'; fastmath.matrix.Mat3x3 is in unnamed module of loader clojure.lang.DynamicClassLoader @c1e1f4c)
+  (def Ireal (fmat/eye 3 true))
+  (fmat/mulm Ireal m)
+  ; eval (effective-root-form): (fmat/mulm Ireal m)
+  ; (err) Execution error (ClassCastException) at fastmath.matrix/eval41805$fn (matrix.clj:686).
+  ; (err) class [[D cannot be cast to class org.apache.commons.math3.linear.RealMatrix ([[D is in module java.base of loader 'bootstrap'; org.apache.commons.math3.linear.RealMatrix is in unnamed module of loader 'app')
+  ;; THIS WORKS:
+  (def Idouble (fm/seq->double-double-array [[1 0 0][0 1 0][0 0 1]]))
+  (fmat/mulm Idouble m)
+
+  (fmat/diagonal 1 1 1)
+
+  (type I)
+  (type Ireal)
+  (type Idouble)
 )
 
