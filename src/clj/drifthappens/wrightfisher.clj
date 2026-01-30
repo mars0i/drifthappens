@@ -110,6 +110,8 @@
 
 ;; ---
 
+;; TODO NEED MORE TESTS OF THESE TWO VERSIONS
+
 (defn tran-mat-elems
   "Creates a sequence of sequences of transition matrix elements that can
   be passsed to left-mult-tran-mat or right-mult-tran-mat.  The sum of
@@ -137,6 +139,12 @@
   (def m2 (mapv vec (tran-mat-elems-old 1.1 1.0 dim dim)))
   (apply max (for [i (range dim), j (range dim)]
                (- ((m1 i) j) ((m2 i) j))))
+
+  (def m1cat (apply concat m1))
+  (apply min m1cat)
+  (apply max m1cat)
+  (double (/ (count (filter zero? m1cat))
+             (count m1cat)))
 )
 
 (defn left-mult-tran-mat
