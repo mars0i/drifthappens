@@ -15,6 +15,7 @@
   (:import [fastmath.vector Vec2 Vec3 Vec4]
            [fastmath.matrix Mat2x2 Mat3x3 Mat4x4]))
 
+;; TODO Make a sequence of mats and then select the ones I want
 (defn make-tran-mats
   [m expts]
   (let [size (first (fmat/shape m))]
@@ -28,10 +29,10 @@
   (mapv (fn [m] (fmat/mulv m init-state))
         tran-mats))
 
-(def big-fit-A 1.05)   ; large size has sel
-(def small-fit-A 1.0) ; small size is pure drift
 (def fit-B 1.0)
-(def increments (iterate (partial + 8) 0))
+(def big-fit-A 1.001)  ; large size has sel
+(def small-fit-A 1.0) ; small size is pure drift
+(def increments (iterate (partial + 16) 0))
 (def generations (map inc increments))
 (def half-generations (map (fn [n] (inc (/ n 2))) increments))
 (comment
@@ -43,16 +44,20 @@
 
 (def num-gens 20)
 
-;; pop size 25 with 50% A, 50% B.
-(def small-pop-init (wf/mkvec (concat (repeat 12 0.0) [1.0] (repeat 12 0.0))))
+;; should be even;
+(def small-N 30)
+(def big-N 1000)
+
+(def half-small-N (/ small-N 2))
+(def half-big-N (/ big-N 2))
+
+(def small-pop-init (wf/mkvec (concat (repeat half-small-N 0.0) [1.0] (repeat half-small-N 0.0))))
 (def small-drift-mat (wf/right-mult-tran-mat small-fit-A fit-B (dec (count small-pop-init))))
 (def small-tran-mats (make-tran-mats small-drift-mat (take num-gens generations)))
 (def small-prob-states (make-prob-states small-tran-mats small-pop-init))
 (def small-plots (mapv uplot/plot-both small-prob-states))
 
-
-;; pop size 500 with 50% A, 50% B.
-(def big-pop-init (wf/mkvec (concat (repeat 250 0.0) [1.0] (repeat 250 0.0))))
+(def big-pop-init (wf/mkvec (concat (repeat half-big-N 0.0) [1.0] (repeat half-big-N 0.0))))
 (def big-drift-mat (wf/right-mult-tran-mat big-fit-A fit-B (dec (count big-pop-init)))) ; use fit-B for fit-A to make them equal
 (def big-tran-mats (make-tran-mats big-drift-mat (take num-gens generations)))
 (def big-prob-states (make-prob-states big-tran-mats big-pop-init))
