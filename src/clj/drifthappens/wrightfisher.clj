@@ -105,7 +105,7 @@
   (for [i (umisc/irange pop-size)]
     (let [sp (sample-prob fit-A fit-B pop-size i)]
       (for [j (umisc/irange sample-size)]
-        (let [tp (small-tran-prob sp sample-size j)]
+        (let [tp (tran-prob sp sample-size j)]
           tp)))))
 
 (defn left-mult-tran-mat
