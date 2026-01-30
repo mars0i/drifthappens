@@ -48,6 +48,24 @@
           (recur (inc i)
                  (fmat/mulm m acc-mat)))))))
 
+(defn make-mat-powers
+  "Returns a sequence of transition matrices that are integer powers of of
+  square matrix m for each exponent in expts.  Does not make use of smaller
+  products previously produced."
+  [m expts]
+  (let [size (first (fmat/shape m))]
+    (doall
+      (cons (fmat/eye size)
+            (map (partial mpow m)
+                 expts)))))
+
+(defn mat-powers
+  "Returns a lazy sequence of powers of a square matrixm, beginning with
+  m^0, i.e. begining with the identity matrix of the same size."
+  [m]
+  (iterate (partial fmat/mulm m)
+           (fmat/eye (first (fmat/shape m)))))
+
 (comment
   (def m (fm/seq->double-double-array [[1 2 3][4 5 6][7 8 9]]))
   (mpow m 10)
