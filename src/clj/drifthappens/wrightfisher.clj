@@ -16,6 +16,7 @@
             [fastmath.vector :as fvec]
             [fastmath.matrix :as fmat]
             [fastmath.core :as fm]
+            [fastmath.random :as frand]
             ;[fastmath.dev.codox :as codox]
             ;[fastmath.dev.clay :as utls]
             ;[fastmath.dev.plotly :as plt]
@@ -58,11 +59,17 @@
 
 ;; ---
 
+;; TODO Why am I calculating this by hand rather than using frand/distribution?
+;; e.g.:
+;; ```
+;; (def bindist (frand/distribution :binomial {:p 0.5 :trials 10}))
+;; (map (fn [n] (.probability bindist n)) (range 11))
+;; ```
 ;; `tran-prob` computes
 ;; $\binom{M}{j} p_i^j q_i^{M-j}$,
 ;; where $M=$`sample-size`, $j=$`As-sampled`, and $p_i$ is the value of values 
 ;; of `sample-prob` for $i=$`freq-A`, and $q_i=1-p_i$.
-(defn tran-prob
+(defn tran-prob-obsolete
   "Returns the probability that sample of sample-size individuals will
   include exactly As-sampled A (not B) individuals, when the probability of
   choosing an A individual is sample-prob-A.  Note that sample-size can't
@@ -75,13 +82,19 @@
        (fm/pow sample-prob-A As-sampled)
        (fm/pow sample-prob-B Bs-sampled))))
 
+;; TODO Why am I calculating this by hand rather than using frand/distribution?
+;; e.g.:
+;; ```
+;; (def bindist (frand/distribution :binomial {:p 0.5 :trials 10}))
+;; (map (fn [n] (.probability bindist n)) (range 11))
+;; ```
 ;; `big-tran-prob` also computes $\binom{M}{j} p_i^j q_i^{M-j}$, but 
 ;; less precisely and it should allow $M\gg 1000$.  It uses the fact that
 ;$\binom{M}{j} p_i^j q_i^{M-j} = 
 ;;\exp \left[\ln\binom{M}{j} + \ln\left(p_i^j q_i^{M-j}\right)\right]$
 ;; However, in practice, if the sample size is much more than 1000, 
 ;; the values will all be zero.
-(defn big-tran-prob
+(defn big-tran-prob-obsolete?
   "Returns the (approximate) probability that sample of sample-size
   individuals will include exactly As-sampled A (not B) individuals, when
   the probability of choosing an A individual is sample-prob-A.  This
@@ -98,6 +111,16 @@
 ;; ---
 
 (defn tran-mat-elems
+  "Creates a sequence of sequences of transition matrix elements that can
+  be passsed to left-mult-tran-mat or right-mult-tran-mat.  The sum of
+  the values in each inner sequence is (approximately) 1.0."
+  [fit-A fit-B pop-size sample-size]
+  (for [i (umisc/irange pop-size)]
+    (let [sp (sample-prob fit-A fit-B pop-size i)
+          bindist (frand/distribution :binomial {:p sp :trials sample-size})]
+      (mapv (fn [n] (.probability bindist n)) (umisc/irange sample-size)))))
+
+(defn tran-mat-elems-old
   "Creates a sequence of sequences of transition matrix elements that can
   be passsed to left-mult-tran-mat or right-mult-tran-mat.  The sum of
   the values in each inner sequence is (approximately) 1.0."
