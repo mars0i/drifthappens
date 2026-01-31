@@ -21,9 +21,11 @@
 (def fit-B 1.0)
 (def big-fit-A 1.01)  ; large size has sel
 (def small-fit-A 1.0) ; small size is pure drift
-(def increments (iterate (partial + 16) 0))
-(def generations (map inc increments))
-(def half-generations (map (fn [n] (inc (/ n 2))) increments))
+(def interval 16) ; interval between generations to display
+(def half-interval (/ interval 2))
+;(def increments (iterate (partial + 16) 0))
+;(def generations (map inc increments))
+;(def half-generations (map (fn [n] (inc (/ n 2))) increments))
 (comment
   (take 10 increments)
   (take 10 generations)
@@ -36,20 +38,22 @@
 
 ;; These numbers need to be even:
 (def small-N 10)
-(def big-N 2000)
+(def big-N 500)
 
 (def half-small-N (/ small-N 2))
 (def half-big-N (/ big-N 2))
 
 (def small-pop-init (wf/mkvec (concat (repeat half-small-N 0.0) [1.0] (repeat half-small-N 0.0))))
 (def small-drift-mat (wf/right-mult-tran-mat small-fit-A fit-B (dec (count small-pop-init))))
-(def small-tran-mats (umath/make-mat-powers small-drift-mat (take num-gens generations)))
+(def small-tran-mats (take num-gens (take-nth interval (umath/mat-powers small-drift-mat))))
+;(def small-tran-mats (umath/make-mat-powers small-drift-mat (take num-gens generations)))
 (def small-prob-states (make-prob-states small-tran-mats small-pop-init))
 (def small-plots (mapv uplot/plot-both small-prob-states))
 
 (def big-pop-init (wf/mkvec (concat (repeat half-big-N 0.0) [1.0] (repeat half-big-N 0.0))))
 (def big-drift-mat (wf/right-mult-tran-mat big-fit-A fit-B (dec (count big-pop-init)))) ; use fit-B for fit-A to make them equal
-(def big-tran-mats (umath/make-mat-powers big-drift-mat (take num-gens generations)))
+(def big-tran-mats (take num-gens (take-nth interval (umath/mat-powers big-drift-mat))))
+;(def big-tran-mats (umath/make-mat-powers big-drift-mat (take num-gens generations)))
 (def big-prob-states (make-prob-states big-tran-mats big-pop-init))
 (def big-plots (mapv uplot/plot-lines big-prob-states))
 
@@ -69,7 +73,8 @@
 ;; We use half-generations here because each step involves two sampling
 ;; processes.  So each generation is analogous to two generations in the
 ;; small and big models.
-(def pred-reprod-tran-mats (umath/make-mat-powers pred-reprod-mat (take num-gens half-generations)))
+(def pred-reprod-tran-mats (take num-gens (take-nth half-interval (umath/mat-powers pred-reprod-mat))))
+;(def pred-reprod-tran-mats (umath/make-mat-powers pred-reprod-mat (take num-gens half-generations)))
 (def pred-reprod-prob-states (make-prob-states pred-reprod-tran-mats big-pop-init))
 (def pred-reprod-plots (mapv uplot/plot-both pred-reprod-prob-states))
 
