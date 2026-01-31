@@ -28,25 +28,37 @@
                   (fmat/mulm factor factor)))]
         (either-pow m (long n)))))) ; allow float integers
 
-;; Simple, tail recursive, but slow for moderately large m and n.
-(defn mpow-slow
-  "Multiplies a square matrix by itself n times.  n must be a positive
-  integer or positive floating-point number with no fractional part."
-  [m n]
-  (let [[h w] (fmat/shape m)]
-    (cond 
-      (not= h w)
-      (print (str "mpow only multiplies square matrices; shape is [" h " " w "].")) ; throw?
+(comment
+  ;; Simple, tail recursive, but slow for moderately large m and n.
+  (defn mpow-slow
+    "Multiplies a square matrix by itself n times.  n must be a positive
+    integer or positive floating-point number with no fractional part."
+    [m n]
+    (let [[h w] (fmat/shape m)]
+      (cond 
+        (not= h w)
+        (print (str "mpow only multiplies square matrices; shape is [" h " " w "].")) ; throw?
 
-      (or (<= n 0) (not (== (rem n 1) 0)))
-      (print "mpow only accepts positive integer powers.") ; throw?
+        (or (<= n 0) (not (== (rem n 1) 0)))
+        (print "mpow only accepts positive integer powers.") ; throw?
 
-      :else 
-      (loop [i 1, acc-mat m]
-        (if (= i n)
-          acc-mat
-          (recur (inc i)
-                 (fmat/mulm m acc-mat)))))))
+        :else 
+        (loop [i 1, acc-mat m]
+          (if (= i n)
+            acc-mat
+            (recur (inc i)
+                   (fmat/mulm m acc-mat)))))))
+)
+
+
+
+(defn make-mat-powers-separately
+  "Returns a sequence of transition matrices that are integer powers of of
+  square matrix m for each exponent in expts.  Inefficient in that it doesn't
+  make use of smaller products previously produced."
+  [m expts]
+  (map (partial mpow m) expts))
+
 
 (defn mat-powers
   "Returns a lazy sequence of powers of a square matrixm, beginning with
@@ -57,12 +69,29 @@
            (fmat/mat->array2d ; at present need to convert eye to Java Array2D for mult with Array2D
              (fmat/eye (first (fmat/shape m))))))
 
-(defn make-mat-powers
-  "Returns a sequence of transition matrices that are integer powers of of
-  square matrix m for each exponent in expts.  Inefficient in that it doesn't
-  make use of smaller products previously produced."
+(defn make-mat-powers-sequentially
   [m expts]
-  (map (partial mpow m) expts))
+  (let [powseq (mat-powers m)]
+    (loop [i 0, pows (mat-powers m), es expts, acc-pows []]
+      (if (empty? expts)
+        acc-pows
+        (if (= i (first es))
+          (recur (inc i)
+                 (rest es)
+                 (rest pows)
+                 (conj acc-pows (first pows)))
+          (recur (inc i)
+                 es ; don't move on until we find it
+                 (rest pows)
+                 acc-pows))))))
+
+;; Can I rewrite the preceding like this?
+(defn make-mat-powers-sequentially2
+  [m expts]
+  (let [expts-set (set expts)]
+    (keep-indexed (fn [i m] (when (expts-set i) m))
+                  (mat-powers m))))
+
 
 (comment
   (def m (fm/seq->double-double-array [[1 2 3][4 5 6][7 8 9]]))
