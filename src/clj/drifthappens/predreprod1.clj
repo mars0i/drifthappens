@@ -40,8 +40,17 @@
 
 (def small-pop-init (wf/mkvec (concat (repeat half-small-N 0.0) [1.0] (repeat half-small-N 0.0))))
 (def small-drift-mat (wf/right-mult-tran-mat small-fit-A fit-B (dec (count small-pop-init))))
+
+;; I think the make-mat-powers version is faster than the iterate version, even though it has to
+;; redo matrix multiplications, because it saves multiplications by aggregating mults and then 
+;; reusing them within a call to mpow.  I think this is because I'm only
+;; taking every 16th matrix. If I was using every one of them, then mat-powers would probably be faster.
+;;
+;; (What would really be cool is some way of combining them so that you could reuse the calcs that mpow
+;; does, across calls to it.  (I've haven't found memoize to be useful in the past.))
 (def small-tran-mats (doall (take num-gens (take-nth interval (umath/mat-powers small-drift-mat))))) ; NEW VERSION: 20% slower (!)
 ;(def small-tran-mats (doall (umath/make-mat-powers small-drift-mat (take num-gens generations)))) ; OLD VERSION
+
 (comment ; for testing
 (def small-prob-states (make-prob-states small-tran-mats small-pop-init))
 (def small-plots (mapv uplot/plot-both small-prob-states))
