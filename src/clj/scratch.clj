@@ -19,6 +19,7 @@
 (comment
   (def m (fm/seq->double-double-array [[1.0M 2.0M][3.0M 4.0M]]))
   (type (fmat/entry m 1 1))
+  (take-nth 5 (range 100))
 )
 
 (comment
@@ -28,25 +29,6 @@
 )
 
 
-
-;; FIXME
-;; Surprisingly, Clojure doesn't have this built in.  select-keys is
-;; related.
-(defn elements-at
-  [xs idxs]
-  (loop [acc [], ys xs, is idxs, i 0]
-    (if (or (empty? ys) (empty? is))
-      acc
-      (recur (if (= i (first is))
-               (conj acc (first ys))
-               acc)
-             (rest ys)
-             (rest is)
-             (inc i)))))
-
-(comment
-  (elements-at (range 25) [1 24])
-)
 (comment
   (defn umath/make-mat-powers
     [m expts]
