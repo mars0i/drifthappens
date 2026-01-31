@@ -54,14 +54,14 @@
 
 (defn make-mat-powers-separately
   "Returns a sequence of transition matrices that are integer powers of of
-  square matrix m for each exponent in expts.  Inefficient in that it doesn't
-  make use of smaller products previously produced."
+  square matrix m for each exponent in expts.  May be less efficient than
+  other methods if the indexes are close together."
   [m expts]
   (map (partial mpow m) expts))
 
 
 (defn mat-powers
-  "Returns a lazy sequence of powers of a square matrixm, beginning with
+  "Returns a lazy sequence of powers of a square matrix beginning with
   m^0, i.e. begining with the identity matrix of the same size.  (Specific
   elements can be extracted e.g. using take-nth or utils/misc/elems-at.)"
   [m]
@@ -86,11 +86,15 @@
                  acc-pows))))))
 
 ;; Can I rewrite the preceding like this?
+;; This is lazy but doesn't allow infinite seqs since using set.
+;; Is that what I want?
 (defn make-mat-powers-sequentially2
   [m expts]
-  (let [expts-set (set expts)]
-    (keep-indexed (fn [i m] (when (expts-set i) m))
-                  (mat-powers m))))
+  (let [expts-set (set expts)
+        n (count expts-set)] ; allow dupes
+    (take n
+          (keep-indexed (fn [i m] (when (expts-set i) m))
+                        (mat-powers m)))))
 
 
 (comment
