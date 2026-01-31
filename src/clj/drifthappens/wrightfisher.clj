@@ -130,7 +130,7 @@
   (for [i (umisc/irange pop-size)]
     (let [sp (sample-prob fit-A fit-B pop-size i)]
       (for [j (umisc/irange sample-size)]
-        (let [tp (tran-prob sp sample-size j)]
+        (let [tp (tran-prob-obsolete sp sample-size j)]
           tp)))))
 
 (comment
