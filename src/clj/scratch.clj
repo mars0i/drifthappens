@@ -2,6 +2,7 @@
 ;; https://generateme.github.io/fastmath/clay/vector_matrix.html#matrices
 (ns scratch
   (:require ;[clojure.math :as m]
+            [criterium.core :as crit]
             [fastmath.vector :as fvec]
             [fastmath.matrix :as fmat]
             [fastmath.core :as fm]
