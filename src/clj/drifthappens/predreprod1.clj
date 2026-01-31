@@ -1,5 +1,6 @@
 (ns drifthappens.predreprod1
   (:require ;[clojure.math :as m]
+            [criterium.core :as crit]
             [fastmath.vector :as fvec]
             [fastmath.matrix :as fmat]
             [fastmath.core :as fm]
@@ -32,24 +33,32 @@
 
 ;; These numbers need to be even:
 (def small-N 10)
-(def big-N 1000)
+(def big-N 500)
 
 (def half-small-N (/ small-N 2))
 (def half-big-N (/ big-N 2))
 
 (def small-pop-init (wf/mkvec (concat (repeat half-small-N 0.0) [1.0] (repeat half-small-N 0.0))))
 (def small-drift-mat (wf/right-mult-tran-mat small-fit-A fit-B (dec (count small-pop-init))))
-(def small-tran-mats (take num-gens (take-nth interval (umath/mat-powers small-drift-mat)))) ; NEW VERSION
-;(def small-tran-mats (umath/make-mat-powers small-drift-mat (take num-gens generations))) ; OLD VERSION
+(def small-tran-mats (doall (take num-gens (take-nth interval (umath/mat-powers small-drift-mat))))) ; NEW VERSION: 20% slower (!)
+;(def small-tran-mats (doall (umath/make-mat-powers small-drift-mat (take num-gens generations)))) ; OLD VERSION
+(comment ; for testing
 (def small-prob-states (make-prob-states small-tran-mats small-pop-init))
 (def small-plots (mapv uplot/plot-both small-prob-states))
+) ; comment for testing
 
 (def big-pop-init (wf/mkvec (concat (repeat half-big-N 0.0) [1.0] (repeat half-big-N 0.0))))
 (def big-drift-mat (wf/right-mult-tran-mat big-fit-A fit-B (dec (count big-pop-init)))) ; use fit-B for fit-A to make them equal
-(def big-tran-mats (take num-gens (take-nth interval (umath/mat-powers big-drift-mat)))) ; NEW VERSION
-;(def big-tran-mats (umath/make-mat-powers big-drift-mat (take num-gens generations))) ; OLD VERSION
+(crit/bench
+(def big-tran-mats (doall (take num-gens (take-nth interval (umath/mat-powers big-drift-mat))))) ; NEW VERSION
+)
+(crit/bench
+(def big-tran-mats (doall (umath/make-mat-powers big-drift-mat (take num-gens generations)))) ; OLD VERSION
+)
+(comment ; for testing
 (def big-prob-states (make-prob-states big-tran-mats big-pop-init))
 (def big-plots (mapv uplot/plot-lines big-prob-states))
+) ; comment for testing
 
 ;small-plots
 ;big-plots
@@ -67,8 +76,9 @@
 ;; We use half-generations here because each step involves two sampling
 ;; processes.  So each generation is analogous to two generations in the
 ;; small and big models.
-(def pred-reprod-tran-mats (take num-gens (take-nth half-interval (umath/mat-powers pred-reprod-mat)))) ; NEW VERSION
-;(def pred-reprod-tran-mats (umath/make-mat-powers pred-reprod-mat (take num-gens half-generations))) ; OLD VERSION
+(def pred-reprod-tran-mats (doall (take num-gens (take-nth half-interval (umath/mat-powers pred-reprod-mat))))) ; NEW VERSION
+;(def pred-reprod-tran-mats (doall (umath/make-mat-powers pred-reprod-mat (take num-gens half-generations)))) ; OLD VERSION
+(comment ; for testing
 (def pred-reprod-prob-states (make-prob-states pred-reprod-tran-mats big-pop-init))
 (def pred-reprod-plots (mapv uplot/plot-both pred-reprod-prob-states))
 
@@ -76,7 +86,9 @@
 
 (def small-big-combo-plots (interleave small-plots big-plots pred-reprod-plots))
 
+; RUN THE PLOTS:
 small-big-combo-plots 
+) ; comment for testing
 
 
 (comment
