@@ -62,8 +62,7 @@
   square matrix m for each exponent in expts.  Inefficient in that it doesn't
   make use of smaller products previously produced."
   [m expts]
-  (let [size (first (fmat/shape m))]
-    (map (partial mpow m) expts)))
+  (map (partial mpow m) expts))
 
 (comment
   (def m (fm/seq->double-double-array [[1 2 3][4 5 6][7 8 9]]))
