@@ -72,7 +72,6 @@
     (take n (keep-indexed (fn [i m] (when (expts-set i) m))
                           (mat-powers m)))))
 
-;; FIXME floats are causing this to not return
 (defn choose-mat-powers-separately
   "Returns a lazy sequence of transition matrices that are integer powers
   of square matrix m for each exponent in collection expts (which should be
