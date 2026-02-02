@@ -1,7 +1,25 @@
 (ns utils.math
-  (:require [fastmath.vector :as fvec]
+  (:require [clojure.math :as math]
+            [fastmath.vector :as fvec]
             [fastmath.matrix :as fmat]
             [fastmath.core :as fm]))
+
+
+(def ln2 (math/log 2))
+
+(defn log2
+  "Returns the log base 2 of x."
+  [x]
+  (/ (math/log x) ln2))
+
+(defn power-of-two?
+  [x]
+  (let [absl2 (log2 x)]
+    (== absl2 (math/round absl2))))
+
+(comment
+  (power-of-two? 128)
+)
 
 ;; Fewer multiplications. Faster for larger m and n than simpler version.
 ;; Uses mutual recursion, but stack depth is O(log2 n).
@@ -43,11 +61,13 @@
 
 (defn choose-mat-powers-sequentially
   "Returns a lazy sequence of transition matrices that are integer powers
-  of square matrix m for each exponent in expts (which may be in any
-  order). Exponents must be nonnegative integers, which may be in a float
-  representation."
+  of square matrix m for each exponent in collection expts (which should be
+  finite, but may be in any order). Exponents must be nonnegative integers,
+  which may be in a float representation. (Use
+  choose-mat-powers-sequentially for closely spaced exponents; use
+  choose-mat-powers-separately for widely space exponents.)"
   [m expts]
-  (let [expts-set (set expts)
+  (let [expts-set (set (map long expts))
         n (count expts-set)] ; don't count dupes
     (take n (keep-indexed (fn [i m] (when (expts-set i) m))
                           (mat-powers m)))))
@@ -55,15 +75,31 @@
 ;; FIXME floats are causing this to not return
 (defn choose-mat-powers-separately
   "Returns a lazy sequence of transition matrices that are integer powers
-  of square matrix m for each exponent in expts (which may be in any
-  order). Exponents must be nonnegative integers, which may be in a float
-  representation."
+  of square matrix m for each exponent in collection expts (which should be
+  finite, but may be in any order). Exponents must be nonnegative integers,
+  which may be in a float representation. (Use
+  choose-mat-powers-sequentially for closely spaced exponents; use
+  choose-mat-powers-separately for widely space exponents.)"
   [m expts]
   (map (partial mpow m) (map long expts)))
+
+
+(defn mat-squares
+  [m]
+  (iterate (fn [mat] (fmat/mulm mat mat)) m))
+
+(defn mat-experimental
+  [m expts]
+  (let [indexed-squares (map-indexed vector (mat-squares m))]
+    2))
+
+
+
 
 (comment
   (def m (fm/seq->double-double-array [[1 2 3][4 5 6][7 8 9]]))
   (def ms (mat-powers m))
+  (def mx (mat-experimental m))
   (take 10 ms)
   (nth ms 9)
   (nth ms 10)
@@ -71,6 +107,10 @@
   (def mpsep2 (choose-mat-powers-separately m [0.0 1.0 4.0 9.0]))
   (def mpseq (choose-mat-powers-sequentially m [0 1 4 9]))
   (def mpseq2 (choose-mat-powers-sequentially m [1.0 4.0 9])) ; loops forever why?
+
+  (def m2s (mat-squares m))
+  (take 4 m2s)
+  (def mpsep (choose-mat-powers-separately m [1 2 4 16]))
 )
 
 
