@@ -25,47 +25,34 @@
 (def interval 16) ; interval between generations to display
 (def half-interval (/ interval 2))
 
-(def increments (iterate (partial + 16) 0)) ; OLD VERSION
-(def generations (map inc increments)) ; OLD VERSION
-(def half-generations (map (fn [n] (inc (/ n 2))) increments)) ; OLD VERSION
+(def increments (iterate (partial + 16) 0))
+(def generations increments)
+(def half-generations (map (fn [n] (/ n 2)) increments))
 
-(def num-gens 15)
+(def num-gens 6)
 
 ;; These numbers need to be even:
 (def small-N 10)
-(def big-N 2000)
+(def big-N 1000)
 
 (def half-small-N (/ small-N 2))
 (def half-big-N (/ big-N 2))
 
+
 (def small-pop-init (wf/mkvec (concat (repeat half-small-N 0.0) [1.0] (repeat half-small-N 0.0))))
 (def small-drift-mat (wf/right-mult-tran-mat small-fit-A fit-B (dec (count small-pop-init))))
-
-;; I think the make-mat-powers version is faster than the iterate version, even though it has to
-;; redo matrix multiplications, because it saves multiplications by aggregating mults and then 
-;; reusing them within a call to mpow.  I think this is because I'm only
-;; taking every 16th matrix. If I was using every one of them, then mat-powers would probably be faster.
-;;
-;; OK, so what if, when you calculate a matrix that's a power of two, you
-;; store it in a map, indexed by its exponent.  And then when a large
-;; matrix needs that matrix, it checks the map, and if it's there, doesn't
-;; recalc.  So essentially, in the recursion step in mpow, at least split,
-;; store the result in an external map.
-;; 
-;(def small-tran-mats (doall (take num-gens (take-nth interval (umath/mat-powers small-drift-mat))))) ; NEW VERSION: 20% slower (!)
-(def small-tran-mats (doall (umath/make-mat-powers small-drift-mat (take num-gens generations)))) ; OLD VERSION
-
+(def small-tran-mats (doall (umath/choose-mat-powers-separately small-drift-mat (take num-gens generations))))
 (def small-prob-states (make-prob-states small-tran-mats small-pop-init))
 (def small-plots (mapv uplot/plot-both small-prob-states))
 
+;small-plots
+
 (def big-pop-init (wf/mkvec (concat (repeat half-big-N 0.0) [1.0] (repeat half-big-N 0.0))))
 (def big-drift-mat (wf/right-mult-tran-mat big-fit-A fit-B (dec (count big-pop-init)))) ; use fit-B for fit-A to make them equal
-;(def big-tran-mats (doall (take num-gens (take-nth interval (umath/mat-powers big-drift-mat))))) ; NEW VERSION: Close to 100% slower--2X!
-(def big-tran-mats (doall (umath/make-mat-powers big-drift-mat (take num-gens generations)))) ; OLD VERSION
+(def big-tran-mats (doall (umath/choose-mat-powers-separately big-drift-mat (take num-gens generations))))
 (def big-prob-states (make-prob-states big-tran-mats big-pop-init))
 (def big-plots (mapv uplot/plot-lines big-prob-states))
 
-;small-plots
 ;big-plots
 
 (def N (dec (count big-pop-init)))
@@ -81,8 +68,7 @@
 ;; We use half-generations here because each step involves two sampling
 ;; processes.  So each generation is analogous to two generations in the
 ;; small and big models.
-;(def pred-reprod-tran-mats (doall (take num-gens (take-nth half-interval (umath/mat-powers pred-reprod-mat))))) ; NEW VERSION
-(def pred-reprod-tran-mats (doall (umath/make-mat-powers pred-reprod-mat (take num-gens half-generations)))) ; OLD VERSION
+(def pred-reprod-tran-mats (doall (umath/choose-mat-powers-separately pred-reprod-mat (take num-gens half-generations))))
 (def pred-reprod-prob-states (make-prob-states pred-reprod-tran-mats big-pop-init))
 (def pred-reprod-plots (mapv uplot/plot-both pred-reprod-prob-states))
 
@@ -90,13 +76,6 @@
 
 (def small-big-combo-plots (interleave small-plots big-plots pred-reprod-plots))
 
-; RUN THE PLOTS:
-;small-big-combo-plots 
+; RUN THE PLOTS FROM ALL THREE POPULATIONS:
+small-big-combo-plots 
 
-
-(comment
-  (fmat/shape predat-drift-mat)
-  (fmat/shape reprod-drift-mat)
-  (fmat/shape pred-reprod-mat)
-  (map fmat/shape pred-reprod-tran-mats)
-)
