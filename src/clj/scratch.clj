@@ -18,6 +18,10 @@
            [fastmath.matrix Mat2x2 Mat3x3 Mat4x4]))
 
 
+;; Experiment below shows with num-gens = 8 and half-interval = 8 that
+;; choose-mat-powers-separately is faster than -sequentially (20 secs
+;; rather than 26 secs).
+
 
 (defn make-prob-states
   [tran-mats init-state]
