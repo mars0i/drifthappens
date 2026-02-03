@@ -78,8 +78,9 @@
 
 ;; We use half-generations here because each step involves two sampling processes.
 ;; So each generation is analogous to two generations in the small and big models.
-(crit/bench
-(def pred-reprod-tran-mats (doall (umath/choose-mat-powers-separately pred-reprod-mat (take num-gens half-generations)))) ; OLD VERSION
+
+(crit/bench ; TURNS OUT -separately IS FASTER (20 secs) THAN -sequentially (26 secs)
+(def pred-reprod-tran-mats (doall (umath/choose-mat-powers-separately pred-reprod-mat (take num-gens half-generations))))
 )
 
 (comment

@@ -87,10 +87,12 @@
   [m]
   (iterate (fn [mat] (fmat/mulm mat mat)) m))
 
+;; Trying to figure out a way to use mat-squares or similar to create a
+;; more efficient sequential-ish generation of powers.
 (defn mat-experimental
   [m expts]
   (let [indexed-squares (map-indexed vector (mat-squares m))]
-    2))
+    2)) ; what here?
 
 
 
