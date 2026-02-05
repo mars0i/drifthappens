@@ -95,6 +95,13 @@
     2)) ; what here?
 
 
+(defn make-prob-states
+  "Given a sequence of transition NxM matrices and an initial state vector
+  of length M, generates a sequence containing the vectors that result from
+  multiplying each matrix (on the left) with the vector (on the right)."
+  [tran-mats init-state]
+  (mapv (fn [m] (fmat/mulv m init-state))
+        tran-mats))
 
 
 (comment
