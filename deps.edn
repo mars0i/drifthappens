@@ -20,10 +20,6 @@
                                    "-Xmx20g"  ; max heap
                                    "-Xss1g"]} ; max per-thread stack size (s/b smaller?)
                                    ;"-XX:TieredStopAtLevel=4"  ; no longer needed >= Java 8 (?)
-           :smallproduction {:jvm-opts ["-Xms4g" ; initial heap
-                                        "-Xmx8g" ; max heap
-                                        "-Xss1g"]} ; max per-thread stack size (s/b smaller?)
-                                       ;"-XX:TieredStopAtLevel=4"  ; no longer needed >= Java 8 (?)
            :bench {:extra-deps {criterium/criterium {:mvn/version "0.4.6"}}}
            :profile {:extra-deps {com.clojure-goes-fast/clj-async-profiler {:mvn/version "1.6.2"}}
                      ;; Will be merged with jvm-opts from other aliases used on same commandline:

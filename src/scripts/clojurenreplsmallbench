@@ -1,2 +1,0 @@
-#!/bin/sh
-exec clojure -M:nrepl-server:smallproduction:bench "$@"
