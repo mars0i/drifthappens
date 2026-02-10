@@ -12,7 +12,7 @@
             [tablecloth.api :as tc]
             [drifthappens.wrightfisher :as wf]
             [utils.plotly :as uplot]
-            [utils.math :as umath]
+            [utils.fastmats :as mats]
             [utils.misc :as umisc])
   (:import [fastmath.vector Vec2 Vec3 Vec4]
            [fastmath.matrix Mat2x2 Mat3x3 Mat4x4]))
@@ -50,7 +50,7 @@
 (def small-pop-init (wf/mkvec (concat (repeat half-small-N 0.0) [1.0] (repeat half-small-N 0.0))))
 (comment
 (def small-drift-mat (wf/right-mult-tran-mat small-fit-A fit-B (dec (count small-pop-init))))
-(def small-tran-mats (doall (umath/choose-mat-powers-separately small-drift-mat (take num-gens generations)))) ; OLD VERSION
+(def small-tran-mats (doall (mats/choose-mat-powers-separately small-drift-mat (take num-gens generations)))) ; OLD VERSION
 (def small-prob-states (make-prob-states small-tran-mats small-pop-init))
 (def small-plots (mapv uplot/plot-both small-prob-states))
 )
@@ -58,7 +58,7 @@
 (def big-pop-init (wf/mkvec (concat (repeat half-big-N 0.0) [1.0] (repeat half-big-N 0.0))))
 (comment
 (def big-drift-mat (wf/right-mult-tran-mat big-fit-A fit-B (dec (count big-pop-init)))) ; use fit-B for fit-A to make them equal
-(def big-tran-mats (doall (umath/choose-mat-powers-separately big-drift-mat (take num-gens generations)))) ; OLD VERSION
+(def big-tran-mats (doall (mats/choose-mat-powers-separately big-drift-mat (take num-gens generations)))) ; OLD VERSION
 (def big-prob-states (make-prob-states big-tran-mats big-pop-init))
 (def big-plots (mapv uplot/plot-lines big-prob-states))
 )
@@ -80,7 +80,7 @@
 ;; So each generation is analogous to two generations in the small and big models.
 
 (crit/bench ; TURNS OUT -separately IS FASTER (20 secs) THAN -sequentially (26 secs)
-(def pred-reprod-tran-mats (doall (umath/choose-mat-powers-separately pred-reprod-mat (take num-gens half-generations))))
+(def pred-reprod-tran-mats (doall (mats/choose-mat-powers-separately pred-reprod-mat (take num-gens half-generations))))
 )
 
 (comment

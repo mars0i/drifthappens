@@ -14,17 +14,24 @@
 (def m23 (nn/dge 2 3 (range 6)))
 (def m32 (nn/dge 3 2 (range 6)))
 
-(def m33 (nc/mm 1.0 v32 v23))
-(def m22 (nc/mm 1.0 v23 v32))
+(def m33 (nc/mm 1.0 m32 m23))
+(def m22 (nc/mm 1.0 m23 m32))
 
 (def v (nn/dv [10 100 1000]))
 
 (comment
   ;; Why are these returning (a copy of?) the original vector?
-  (nc/mv m33 v)
+  ;; Well that's weird; now they're not. (Maybe I downloaded a bugfix?)
+  (nc/mv m33 v) ; vector multiplication treats vector on right as column
   (nc/mv m23 v)
 
   (nc/mm m23 v) ; fails
+
+  ;; weird naming
+  (nc/mrows m23)
+  (nc/ncols m23)
+  (nc/mrows m32)
+  (nc/ncols m32)
 )
 
 

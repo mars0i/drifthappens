@@ -25,6 +25,7 @@
             [scicloj.kindly.v4.kind :as kind]
             [scicloj.tableplot.v1.plotly :as plotly]
             [tablecloth.api :as tc]
+            [utils.fastmats :as mats]
             [utils.misc :as umisc])
   (:import [fastmath.vector ArrayVec Vec2 Vec3 Vec4]
            [fastmath.matrix Mat2x2 Mat3x3 Mat4x4]))
@@ -163,7 +164,7 @@
   ([fit-A fit-B pop-size]
    (right-mult-tran-mat fit-A fit-B pop-size pop-size))
   ([fit-A fit-B pop-size sample-size]
-   (fmat/transpose
+   (mats/transpose
      (left-mult-tran-mat fit-A fit-B pop-size sample-size))))
 
 ;; ---

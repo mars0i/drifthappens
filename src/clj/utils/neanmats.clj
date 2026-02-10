@@ -1,8 +1,13 @@
-(ns utils.fastmats
+(ns utils.neanmats
   (:require [clojure.math :as math]
-            [fastmath.vector :as fvec]
-            [fastmath.matrix :as fmat]
-            [fastmath.core :as fm]))
+            [uncomplicate.neanderthal
+             [core :as nc]
+             [native :as nn]
+             ;[real :as nreal]
+             ;[random :as nrand]
+            ]
+            ;[uncomplicate.fluokitten.core :as ktn]
+           ))
 
 
 (def ln2 (math/log 2))
@@ -21,7 +26,7 @@
   (power-of-two? 128)
 )
 
-(def transpose fmat/transpose) ; alias
+(def transpose nc/trans) ; alias for users of this namespace
 
 ;; Fewer multiplications. Faster for larger m and n than simpler version.
 ;; Uses mutual recursion, but stack depth is O(log2 n).
@@ -30,7 +35,8 @@
   integer or positive floating-point number with no fractional part. Returns
   the identity nmatrix of the same shape when n=0."
   [m n]
-  (let [[h w] (fmat/shape m)]
+  (let [h (nc/mrows m)
+        w (nc/ncols m)]
     (cond 
       (not= h w) 
       (print (str "mpow only multiplies square matrices. Matrix shape was [" h " " w "].")) ; throw?
@@ -38,6 +44,7 @@
       (or (< n 0) (not (zero? (rem n 1))))
       (print (str "mpow only accepts nonnegative integer powers. Exponent was " n)) ; throw?
 
+;; TODO MODIFIED FOR NEANDERTHAL UP TO THIS POINT
       (zero? n)
       (fmat/mat->array2d (fmat/eye h)) ; at present need to convert eye to Java Array2D for mult with Array2D
 
@@ -209,4 +216,5 @@
             (recur (inc i)
                    (fmat/mulm m acc-mat)))))))
 )
+
 
