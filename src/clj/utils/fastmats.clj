@@ -2,26 +2,18 @@
   (:require [clojure.math :as math]
             [fastmath.vector :as fvec]
             [fastmath.matrix :as fmat]
-            [fastmath.core :as fm]))
-
-
-(def ln2 (math/log 2))
-
-(defn log2
-  "Returns the log base 2 of x."
-  [x]
-  (/ (math/log x) ln2))
-
-(defn power-of-two?
-  [x]
-  (let [absl2 (log2 x)]
-    (== absl2 (math/round absl2))))
-
-(comment
-  (power-of-two? 128)
-)
+            [fastmath.core :as fm]
+            [utils.math :as um]))
 
 (def transpose fmat/transpose) ; alias
+
+;; generateme/fastmath supports a variety of different vector and
+;; matrix representations, but they don't all have the same conveniences
+;; and don't necessarily work with the multiplication operators.
+;; These are aliases for the current best choice for me.  See
+;; https://clojurians.zulipchat.com/#narrow/channel/151924-data-science/topic/Matrix-vector.20multiplication.20in.20fastmath/near/569973078
+(def mkvec double-array)
+(def mkmat fm/seq->double-double-array)
 
 ;; Fewer multiplications. Faster for larger m and n than simpler version.
 ;; Uses mutual recursion, but stack depth is O(log2 n).

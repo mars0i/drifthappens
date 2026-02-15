@@ -17,3 +17,11 @@
   (:import [fastmath.vector Vec2 Vec3 Vec4]
            [fastmath.matrix Mat2x2 Mat3x3 Mat4x4]))
 
+
+;; reviewing
+;; https://math.libretexts.org/Bookshelves/Linear_Algebra/A_First_Course_in_Linear_Algebra_(Kuttler)/07%3A_Spectral_Theory/7.01%3A_Eigenvalues_and_Eigenvectors_of_a_Matrix
+
+(def A (mats/mkmat [[0 5 -10 ][ 0 22 16 ][ 0 -9 -2]]))
+
+(fmat/mulv A (mats/mkvec [-5 -4 3]))
+(fmat/mulv A (mats/mkvec [1 0 0]))

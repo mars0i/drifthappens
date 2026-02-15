@@ -57,7 +57,7 @@
 (def small-pop-init 
   "A vector of initial probabilities of frequencies for a small population,
   typically with 1 as one element and zeros elswhere."
-  (wf/mkvec (concat (repeat half-small-N 0.0) [1.0] (repeat half-small-N 0.0))))
+  (mats/mkvec (concat (repeat half-small-N 0.0) [1.0] (repeat half-small-N 0.0))))
 
 (def small-tran-mat 
   "A single transition matrix for a small population."
@@ -83,7 +83,7 @@
 (def big-pop-init 
   "A vector of initial probabilities of frequencies for a big population,
   typically with 1 as one element and zeros elswhere."
-  (wf/mkvec (concat (repeat half-big-N 0.0) [1.0] (repeat half-big-N 0.0))))
+  (mats/mkvec (concat (repeat half-big-N 0.0) [1.0] (repeat half-big-N 0.0))))
 
 (def big-tran-mat 
   "A single transition matrix for a big population."

@@ -30,16 +30,6 @@
   (:import [fastmath.vector ArrayVec Vec2 Vec3 Vec4]
            [fastmath.matrix Mat2x2 Mat3x3 Mat4x4]))
 
-;; ---
-
-
-;; generateme/fastmath supports a variety of different vector and
-;; matrix representations, but they don't all have the same conveniences
-;; and don't necessarily work with the multiplication operators.
-;; These are aliases for the current best choice for me.  See
-;; https://clojurians.zulipchat.com/#narrow/channel/151924-data-science/topic/Matrix-vector.20multiplication.20in.20fastmath/near/569973078
-(def mkvec double-array)
-(def mkmat fm/seq->double-double-array)
 
 ;; ---
 
@@ -155,7 +145,7 @@
   ([fit-A fit-B pop-size]
    (left-mult-tran-mat fit-A fit-B pop-size pop-size))
   ([fit-A fit-B pop-size sample-size]
-   (mkmat (tran-mat-elems fit-A fit-B pop-size sample-size))))
+   (mats/mkmat (tran-mat-elems fit-A fit-B pop-size sample-size))))
 
 (defn right-mult-tran-mat
   "Create a transition matrix in which the sum of values in each column is
@@ -176,7 +166,7 @@
   (count tme) ; 1001
   (count (first tme)) ; 51
   (apply = (map count tme)) ; true
-  (def lmtmraw (mkmat tme))
+  (def lmtmraw (mats/mkmat tme))
   (fmat/shape lmtmraw) ; [1001 51]
   (def lmtm (left-mult-tran-mat 1.0 1.0 1000 50))
   (fmat/shape lmtm) ; [1001 51]
