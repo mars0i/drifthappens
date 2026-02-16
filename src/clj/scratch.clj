@@ -17,19 +17,7 @@
   (:import [fastmath.vector Vec2 Vec3 Vec4]
            [fastmath.matrix Mat2x2 Mat3x3 Mat4x4]))
 
-
-(def A (mats/mkmat [[0 5 -10 ][ 0 22 16 ][ 0 -9 -2]]))
-(fmat/mulv A (mats/mkvec [-5 -4 3]))
-(fmat/mulv A (mats/mkvec [1 0 0]))
-
-(def fow (fmat/eigen-decomposition A))
-(:real-eigenvalues fow)
-
-(def v (fmat/decomposition-component fow :V))
-(def d (fmat/decomposition-component fow :D))
-(def di (fmat/inverse d)) ; noninvertible ; nonindvertible
-;(fmat/mulm v d (fmat/inverse d))
-
+;; Example matrix from https://generateme.github.io/fastmath/clay/vector_matrix.html
 (def M3x3 (Mat3x3. 1 2 3 -4 5 6 9 -8 7))
 
 (def m3m (fmat/mulm M3x3 M3x3))
@@ -46,14 +34,23 @@
 ;; mulm takes only two matrix args
 (reduce fmat/mulm [v d vi]) ; this product should be equal to m3m (up to float-slop)
 
+v
 ;; A sequence of the columns of v:
 (fmat/decomposition-component m3m-edecomp :eigenvectors)
-v
 
+d
+(fmat/eigenvalues m3m) ; seq of pairs of [real, imag] components of eigenvals
+
+;; Apparently these are not real and imaginary evals, but rather
+;; real and imaginary components of eigenvalues:
 (fmat/decomposition-component m3m-edecomp :real-eigenvalues) ; ? diag of d
 (fmat/decomposition-component m3m-edecomp :imag-eigenvalues) ; ? sub/super pairs of d
-d
 
-(fmat/decomposition-component m3m-edecomp :complex?)
+;; Seems to be same as fmat/eigenvalues but as a matrix rather than
+;; a clojure sequence.  Also seems to be same as :D from the
+;; eigen-decomposition.
+(fmat/eigenvalues-matrix m3m)
 
-;; see also https://generateme.github.io/fastmath/clay/vector_matrix.html#eigenvalues-and-singular-values
+;; Seems to be same as :V in the eigen-decomposition:
+(fmat/eigenvectors m3m)
+
