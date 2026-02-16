@@ -129,6 +129,17 @@
   mat.  It represents predation followed by reproductive growth."
   (fmat/mulm reprod-tran-mat predat-tran-mat))
 
+(comment
+  ;; experiments with eigenvecs/vals
+  (type pred-reprod-mat)
+  (fmat/shape pred-reprod-mat)
+  ;; I'm getting "convergence failed" errors from these:
+  (fmat/eigenvalues pred-reprod-mat)
+  (fmat/eigenvectors pred-reprod-mat)
+  (def predreproddecomp (fmat/eigen-decomposition pred-reprod-mat)
+)
+
+(comment
 ;; We use half-generations here because each step involves two sampling processes.  
 ;; So each generation is analogous to two generations in the small and big models.
 ;; NOTE: Consider replacing choose-mat-powers-separately with choose-mat-powers-sequentially if the exponents are closely spaced; it might be more efficient:
@@ -142,6 +153,7 @@
 
 ;; Plots made from the preceding sequence of states.
 (def pred-reprod-plots (mapv uplot/plot-both pred-reprod-prob-states))
+)
 
 ;pred-reprod-plots  ; display the plots
 
@@ -149,9 +161,11 @@
 ;; ---
 ; ### Plots from all three populations:
 
+(comment
 (def small-big-combo-plots 
   "States resulting from alternating plots from other sequences of plots."
   (interleave small-plots big-plots pred-reprod-plots))
+)
 
 ;small-big-combo-plots   ; display the plots
 
