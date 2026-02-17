@@ -38,8 +38,6 @@ v
 ;; A sequence of the columns of v:
 (fmat/eigenvectors m3m)
 (fmat/eigenvectors m3m true)
-(map (fn [xs] (reduce + xs))
-     (fmat/decomposition-component m3m-edecomp :eigenvectors))
 
 d
 (fmat/eigenvalues m3m) ; seq of pairs of [real, imag] components of eigenvals
@@ -48,6 +46,7 @@ d
 ;; real and imaginary components of eigenvalues:
 (fmat/decomposition-component m3m-edecomp :real-eigenvalues) ; ? diag of d
 (fmat/decomposition-component m3m-edecomp :imag-eigenvalues) ; ? sub/super pairs of d
+(fmat/decomposition-component m3m-edecomp :eigenvectors) ; ? sub/super pairs of d
 
 ;; Seems to be same as fmat/eigenvalues but as a matrix rather than
 ;; a clojure sequence.  Also seems to be same as :D from the
@@ -78,8 +77,8 @@ d
 
 ;; These next two values should even numbers so that when divided,
 ;; we'll get integers:
-(def small-N 2)
-(def big-N 4)
+(def small-N 4)
+(def big-N 8)
 
 (def half-small-N (/ small-N 2))
 (def half-big-N (/ big-N 2))
@@ -165,8 +164,6 @@ d
 ;; The problem below with eigenvectors is this one:
 ;; https://github.com/generateme/fastmath/issues/42
 
-(fmat/decomposition-component (fmat/eigen-decomposition m5x5) :ebal)
-
 (comment
   ;; experiments with eigenvecs/vals
   pred-reprod-mat
@@ -182,7 +179,8 @@ d
   (type (fmat/decomposition-component predreproddecomp :V))
   (fmat/decomposition-component predreproddecomp :real-eigenvalues)
   (fmat/decomposition-component predreproddecomp :imag-eigenvalues)
-  (fmat/decomposition-component predreproddecomp :eigenvectors) ; succeeds but empty seq
+  (fmat/decomposition-component predreproddecomp :eigenvectors)
+  (map fvec/vec->seq (fmat/decomposition-component predreproddecomp :eigenvectors)) ; succeeds but empty seq
 
   ;; What happens if I convert to RealMat first?
   (def predreprodmat2d (fmat/array2d->RealMatrix pred-reprod-mat))
@@ -270,10 +268,10 @@ d
 (type mdub)
 
 (def m5x5 (fmat/rows->RealMatrix [[1 2 3 4 5]
-                                   [6 7 8 9 10]
-                                   [-1 -2 -3 -4 -5]
-                                   [-6 -7 -8 -9 -10]
-                                   [1 2 3 4 5]]))
+                                  [6 7 8 9 10]
+                                  [-1 -2 -3 -4 -5]
+                                  [-6 -7 -8 -9 -10]
+                                  [1 2 3 4 5]]))
 
 (fmat/eigenvectors m5x5)
 ; (err) Wrong number of args (5) passed to: fastmath.matrix/rows->mat
@@ -283,8 +281,10 @@ d
 
 (def m5x5-decomp (fmat/eigen-decomposition m5x5))
 
-(fmat/decomposition-component m5x5-decomp :eigenvectors) ; => empty Clojure vector
-(fmat/decomposition-component (fmat/eigen-decomposition m5x5) :eigenvectors) ; same thing
+(fmat/decomposition-component m5x5-decomp :eigenvectors)
+(fmat/decomposition-component (fmat/eigen-decomposition m5x5) :eigenvectors)
+(map fvec/vec->seq
+     (fmat/decomposition-component m5x5-decomp :eigenvectors))
 
 ;; These succeed:
 (fmat/eigenvalues m5x5)
