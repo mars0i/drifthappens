@@ -77,8 +77,8 @@ d
 
 ;; These next two values should even numbers so that when divided,
 ;; we'll get integers:
-(def small-N 4)
-(def big-N 8)
+(def small-N 6)
+(def big-N 14)
 
 (def half-small-N (/ small-N 2))
 (def half-big-N (/ big-N 2))
@@ -174,28 +174,129 @@ d
   (fmat/eigenvalues pred-reprod-mat) ;; works with 5x5
   (fmat/eigenvectors pred-reprod-mat) ; fails.  Tried various conversions
   (def predreproddecomp (fmat/eigen-decomposition pred-reprod-mat))
-  (fmat/decomposition-component predreproddecomp :D)
-  (fmat/decomposition-component predreproddecomp :V)
+  (fmat/mat->array 
+    (fmat/decomposition-component predreproddecomp :D)
+  )
+  (fmat/mat->array 
+    (fmat/decomposition-component predreproddecomp :V)
+  )
   (type (fmat/decomposition-component predreproddecomp :V))
   (fmat/decomposition-component predreproddecomp :real-eigenvalues)
   (fmat/decomposition-component predreproddecomp :imag-eigenvalues)
   (fmat/decomposition-component predreproddecomp :eigenvectors)
-  (map fvec/vec->seq (fmat/decomposition-component predreproddecomp :eigenvectors)) ; succeeds but empty seq
+  (map fvec/vec->seq (fmat/decomposition-component predreproddecomp :eigenvectors))
+
+  ;; ---
+
+(def m (fmat/rows->RealMatrix
+           [[1.0, 0.6637495573585641, 0.4272874559265132, 0.2654410598289928,
+             0.15811598711862837, 0.08956507176600371, 0.0477138732755275,
+             0.023542733926677765, 0.010525383640630919, 0.004124092472272302,
+             0.001341370727588796, 3.2821670644383045E-4, 4.8912070734631946E-5,
+             2.3648379316104523E-6, 0.0],
+            [0.0, 0.06498727081139731, 0.08918591901162025, 0.08899340480302088,
+             0.076094979818456, 0.05837576249647409, 0.0407409763701028,
+             0.02584435126923635, 0.014724687436623222, 0.00735058255745415,
+             0.0030733217025500346, 9.87930185150087E-4, 2.023893313002936E-4,
+             1.5015163841875311E-5, 0.0],
+            [0.0, 0.08794333963174404, 0.12477929280788937, 0.1292039760036972,
+             0.11514586577659561, 0.0925533100420665, 0.06811876562294183,
+             0.04593976207210663, 0.028116591768610897, 0.01528672628718937,
+             0.007095959041189156, 0.002606274198905312, 6.404418733248367E-4,
+             6.333958527836005E-5, 0.0],
+            [0.0, 0.07639058338382698, 0.1166468933399246, 0.13017778015811657,
+             0.1252800345401505, 0.1090186925379813, 0.08715620175421784,
+             0.0641304488047315, 0.04308164804342768, 0.025928091549180268,
+             0.01349076037492816, 0.00566679705893444, 0.0016518393982085998,
+             2.1121548409098616E-4, 0.0],
+            [0.0, 0.04997940948378009, 0.08765529258270305, 0.11042273537781772,
+             0.11851032053067201, 0.11406117428824489, 0.10033772699230568,
+             0.08105018709319961, 0.059808728668060064, 0.039699392443448216,
+             0.022983700322418473, 0.010921983416010885, 0.0037204235791706373,
+             6.018084510938057E-4, 0.0],
+            [0.0, 0.028094043799514377, 0.06029808517253643, 0.0878429223155858,
+             0.10587050564799562, 0.11258706062787878, 0.1084844915575997,
+             0.09563006637875067, 0.07702438245663279, 0.05602761335424251,
+             0.03585403659576232, 0.019134842419556316, 0.00754922352067117,
+             0.0015237457828414425, 0.0],
+            [0.0, 0.014930908516603777, 0.039906515305181745, 0.06680593112294475,
+             0.08968775592165211, 0.1047162211065144, 0.1100204313409928,
+             0.10548670589749444, 0.09248401955396415, 0.07352254303637273,
+             0.05184528300710122, 0.030952821599221296, 0.014061155496672447,
+             0.0034926345603350627, 0.0],
+            [0.0, 0.0076605496089470655, 0.025054877280984794,
+             0.04780303995739107, 0.07130684615121308, 0.09137076092832726,
+             0.10468184940987312, 0.1091487587960605, 0.10409973891135059,
+             0.09033970127101076, 0.07006631666904285, 0.046645151287484844,
+             0.02424384132708681, 0.007325306159360033, 0.0],
+            [0.0, 0.003684123852951813, 0.014642409058654993, 0.03194110059528582,
+             0.05311005047358716, 0.07483765144474376, 0.0935901904512271,
+             0.10615562182060892, 0.11011176020234424, 0.10421889324752348,
+             0.08873681403159372, 0.06566627322004881, 0.03891485097708908,
+             0.014387248617250003, 0.0],
+            [0.0, 0.0016204846972839295, 0.007915543801113114,
+             0.019872979432674524, 0.036958226329897544, 0.057381953876503265,
+             0.07842778050521788, 0.09684010047514993, 0.1092720230233315,
+             0.1127934238904237, 0.10545910922058574, 0.08693709183550805,
+             0.05919697988260963, 0.027258477857399113, 0.0],
+            [0.0, 6.445970134384694E-4, 0.003925367140393781,
+             0.011410646075883891, 0.023828693952606724, 0.04089269979843884,
+             0.061249484431984524, 0.08255190179617528, 0.10165493872991943,
+             0.11493551317780272, 0.11873597083783832, 0.10993128024726814,
+             0.08661992630641394, 0.04893850224057894, 0.0],
+            [0.0, 2.2764395941963882E-4, 0.0017523145006021325,
+             0.0059503369768318356, 0.014054998321100099, 0.02683518385157636,
+             0.04432874325163541, 0.06563058572444108, 0.08873550432208584,
+             0.11043572944928717, 0.12627321154163942, 0.13054663291842283,
+             0.11637314880996794, 0.07580485755957672, 0.0],
+            [0.0, 6.861135452365823E-5, 6.82135898864356E-4,
+             0.0027467130278743417, 0.007419728778561235, 0.015883384642737815,
+             0.029058804158331366, 0.04726067727935268, 0.0697924425245244,
+             0.09448200690456945, 0.11715800362815809, 0.1310665875865158,
+             0.12622876861668958, 0.08873828254347459, 0.0],
+            [0.0, 1.631523517687666E-5, 2.1610012014743415E-4,
+             0.0010444190384004516, 0.0032274382603528435, 0.0076817619686832235,
+             0.015330927358408552, 0.026829058811703943, 0.04219168114746543,
+             0.06033369194561612, 0.07851449294615492, 0.09169028052294907,
+             0.09177349523226917, 0.06679943043606759, 0.0],
+            [0.0, 2.5612928278137376E-6, 5.1798052871113494E-5,
+             3.4295528548221993E-4, 0.001388568378531129, 0.004239310623825501,
+             0.010759753519633706, 0.023959039854311047, 0.048376469571028806,
+             0.09052199841360695, 0.15937164935344883, 0.26691783679758035,
+             0.42877460357779124, 0.6648377707208799, 1.0]]))
+
+(= pred-reprod-2d m)
 
   ;; What happens if I convert to RealMat first?
   (def pred-reprod-2d (fmat/array2d->RealMatrix pred-reprod-mat))
+  ;(def pred-reprod-2d (fmat/array2d->RealMatrix big-tran-mat)) ;; FIXME TEST
   (type pred-reprod-2d)
   (fmat/shape pred-reprod-2d)
-  (fmat/mat->array pred-reprod-2d)
+  (fmat/mat->array2d pred-reprod-2d)
 
   (def ra2dcomp (fmat/eigen-decomposition pred-reprod-2d))
+  (def evals (fmat/decomposition-component ra2dcomp :real-eigenvalues)) ; no imaginary parts in this case 
+  (def evecs (fmat/decomposition-component ra2dcomp :eigenvectors))
   (fmat/eigenvectors pred-reprod-2d) ; fails.  Tried various conversions
   (fmat/decomposition-component ra2dcomp :D)
   (fmat/decomposition-component ra2dcomp :V)
   (type (fmat/decomposition-component ra2dcomp :V))
-  (fmat/decomposition-component ra2dcomp :real-eigenvalues)
+  (type evals) ; evals is Java vector not a Clojure vector
   (fmat/decomposition-component ra2dcomp :imag-eigenvalues)
-  (fmat/decomposition-component ra2dcomp :eigenvectors) ; succeeds but empty seq
+  (map fvec/vec->seq evecs)
+
+  ;; test the eigenvector/value relationship for each pair:
+  (map #(fvec/delta-eq (fmat/mulv pred-reprod-2d %1) ; matrix-vector mult
+                       (fvec/mult %1 %2)) ; vector-scalar mult
+       evecs
+       (vec evals))
+
+
+  (map (fn [evec] fmat/mulv pred-reprod-2d evec) evecs)
+  (map (fn [evec] fmat/mulv pred-reprod-2d evec) evecs)
+
+
+
 )
 
 (comment
@@ -277,10 +378,10 @@ d
                                   [-6 -7 -8 -9 -10]
                                   [1 2 3 4 5]]))
 
-(fmat/eigenvectors m5x5)
+;(fmat/eigenvectors m5x5)
 ; (err) Wrong number of args (5) passed to: fastmath.matrix/rows->mat
 
-(fmat/eigenvalues-matrix m5x5)
+;(fmat/eigenvalues-matrix m5x5)
 ; (err) Wrong number of args (5) passed to: fastmath.matrix/rows->mat
 
 (def m5x5-decomp (fmat/eigen-decomposition m5x5))
