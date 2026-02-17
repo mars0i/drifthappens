@@ -168,8 +168,8 @@ d
   ;; experiments with eigenvecs/vals
   pred-reprod-mat
   (type pred-reprod-mat)
-  (type (fmat/array2d->RealMatrix pred-reprod-mat))
   (fmat/shape pred-reprod-mat)
+
   ;; I get "illegal state: convergence failed" errors, even for 100x100 matrix
   (fmat/eigenvalues pred-reprod-mat) ;; works with 5x5
   (fmat/eigenvectors pred-reprod-mat) ; fails.  Tried various conversions
@@ -183,9 +183,13 @@ d
   (map fvec/vec->seq (fmat/decomposition-component predreproddecomp :eigenvectors)) ; succeeds but empty seq
 
   ;; What happens if I convert to RealMat first?
-  (def predreprodmat2d (fmat/array2d->RealMatrix pred-reprod-mat))
-  (def ra2dcomp (fmat/eigen-decomposition predreprodmat2d))
-  (fmat/eigenvectors predreprodmat2d) ; fails.  Tried various conversions
+  (def pred-reprod-2d (fmat/array2d->RealMatrix pred-reprod-mat))
+  (type pred-reprod-2d)
+  (fmat/shape pred-reprod-2d)
+  (fmat/mat->array pred-reprod-2d)
+
+  (def ra2dcomp (fmat/eigen-decomposition pred-reprod-2d))
+  (fmat/eigenvectors pred-reprod-2d) ; fails.  Tried various conversions
   (fmat/decomposition-component ra2dcomp :D)
   (fmat/decomposition-component ra2dcomp :V)
   (type (fmat/decomposition-component ra2dcomp :V))
