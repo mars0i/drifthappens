@@ -2,9 +2,12 @@
 (ns mwe2
   (:require [fastmath.matrix :as fmat]))
 
-;; A 15x15 matrix (generated elsewhere). I'm not sure what it is about the
-;; matrix that makes the error happen.  (Smaller matrices generated in the
-;; same way don't generate the error, but larger ones do.)
+;; A 15x15 stochastic matrix (generated elsewhere). I'm not sure what it is about
+;; the matrix that makes the error happen.  (Smaller matrices generated in the
+;; same way don't generate the error, but larger ones do.  For example, the
+;; smaller matrices that don't cause the error also have 1.0 followee by all zeros
+;; in the first column, and all zeros except for 1.0 in the last element of the last
+;; column.)
 (def m (fmat/rows->RealMatrix
          [[1.0, 0.6637495573585641, 0.4272874559265132, 0.2654410598289928,
            0.15811598711862837, 0.08956507176600371, 0.0477138732755275,
