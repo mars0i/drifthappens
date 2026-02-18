@@ -25,13 +25,12 @@
 (def v (nn/dv [10 100 1000]))
 
 (comment
-  ;; Why are these returning (a copy of?) the original vector?
-  ;; Well that's weird; now they're not. (Maybe I downloaded a bugfix?)
   (nc/mv m33 v) ; vector multiplication treats vector on right as column
   (nc/mv m23 v)
 
   (nc/mm m23 v) ; fails
 
+  ;; instead of shape
   ;; weird naming
   (nc/mrows m23)
   (nc/ncols m23)
