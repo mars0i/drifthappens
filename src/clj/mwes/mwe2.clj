@@ -88,7 +88,19 @@
 (fmat/shape m)
 
 (comment
-  (fmat/eigen-decomposition m)
+  (def decomp (fmat/eigen-decomposition m {:backend :colt}))
+  ;; Without {:backend :colt} uses Apache, which gives up and says:
   ; (err) Execution error (MaxCountExceededException) at org.apache.commons.math3.linear.SchurTransformer/transform (SchurTransformer.java:205).
   ; (err) illegal state: convergence failed
-  )
+
+  (def realvals (fmat/decomposition-component decomp :real-eigenvalues))
+  (def imagvals (fmat/decomposition-component decomp :imag-eigenvalues))
+  (def eigenvecs (fmat/decomposition-component decomp :eigenvectors))
+  (fmat/decomposition-component decomp :D)
+  (fmat/decomposition-component decomp :V)
+
+  (type decomp)
+  (type eigenvecs)
+  (type realvals)
+  (type (fmat/decomposition-component decomp :V))
+)
