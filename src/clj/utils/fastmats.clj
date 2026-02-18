@@ -97,6 +97,19 @@
   (mapv (fn [m] (fmat/mulv m init-state))
         tran-mats))
 
+;; TODO only works with real eigenvalues
+(defn test-eigen-vecs-vals
+  "Test the eigenvector/eigenvalue relationship is correct. Returns a sequence
+  of Clojure booleans."
+  [m]
+  (let [decomp (fmat/eigen-decomposition pred-reprod-2d {:backend :colt})
+        evecs (fmat/decomposition-component decomp :eigenvectors)
+        revals (fmat/decomposition-component decomp :real-eigenvalues)
+        ievals (fmat/decomposition-component decomp :imag-eigenvalues)]
+    (map #(fvec/delta-eq (fmat/mulv m %1) ; matrix-vector mult
+                         (fvec/mult %1 %2)) ; vector-scalar mult
+         evecs
+         (vec revals))))
 
 (comment
   (def m (fm/seq->double-double-array [[1 2 3][4 5 6][7 8 9]]))

@@ -17,45 +17,6 @@
   (:import [fastmath.vector Vec2 Vec3 Vec4]
            [fastmath.matrix Mat2x2 Mat3x3 Mat4x4]))
 
-;; Example matrix from https://generateme.github.io/fastmath/clay/vector_matrix.html
-(def M3x3 (Mat3x3. 1 2 3 -4 5 6 9 -8 7))
-
-(def m3m (fmat/mulm M3x3 M3x3))
-
-;; Generates a structure containing a map in which many components
-;; are not delayed and not yet forced.  fmat/decomposition-component 
-;; forces and replaces the :not-delivered value with the actual value.
-(def m3m-edecomp (fmat/eigen-decomposition m3m))
-
-(def v (fmat/decomposition-component m3m-edecomp :V))
-(def d (fmat/decomposition-component m3m-edecomp :D))
-(def vi (fmat/inverse v))
-
-;; mulm takes only two matrix args
-(reduce fmat/mulm [v d vi]) ; this product should be equal to m3m (up to float-slop)
-
-v
-;; A sequence of the columns of v:
-(fmat/eigenvectors m3m)
-(fmat/eigenvectors m3m true)
-
-d
-(fmat/eigenvalues m3m) ; seq of pairs of [real, imag] components of eigenvals
-
-;; Apparently these are not real and imaginary evals, but rather
-;; real and imaginary components of eigenvalues:
-(fmat/decomposition-component m3m-edecomp :real-eigenvalues) ; ? diag of d
-(fmat/decomposition-component m3m-edecomp :imag-eigenvalues) ; ? sub/super pairs of d
-(fmat/decomposition-component m3m-edecomp :eigenvectors) ; ? sub/super pairs of d
-
-;; Seems to be same as fmat/eigenvalues but as a matrix rather than
-;; a clojure sequence.  Also seems to be same as :D from the
-;; eigen-decomposition.
-(fmat/eigenvalues-matrix m3m)
-
-;; Seems to be same as :V in the eigen-decomposition:
-(fmat/eigenvectors m3m)
-
 ;; --------------------------
 
 ;; From predreprod1.clj:
@@ -77,8 +38,8 @@ d
 
 ;; These next two values should even numbers so that when divided,
 ;; we'll get integers:
-(def small-N 6)
-(def big-N 14)
+(def small-N 200)
+(def big-N 4000)
 
 (def half-small-N (/ small-N 2))
 (def half-big-N (/ big-N 2))
@@ -141,6 +102,7 @@ d
 (def N (dec (count big-pop-init)))
 (def M (dec (count small-pop-init)))
 
+(comment
 ;; Shrinking and expanding matrices.
 ;;
 ;; Note M and N are swapped in the next two
@@ -161,8 +123,7 @@ d
   mat.  It represents predation followed by reproductive growth."
   (fmat/mulm reprod-tran-mat predat-tran-mat))
 
-;; The problem below with eigenvectors is this one:
-;; https://github.com/generateme/fastmath/issues/42
+)
 
 (comment
   ;; experiments with eigenvecs/vals
@@ -193,14 +154,15 @@ d
 
   ;; What happens if I convert to RealMat first?
   (def pred-reprod-2d (fmat/array2d->RealMatrix pred-reprod-mat))
-  ;(def pred-reprod-2d (fmat/array2d->RealMatrix big-tran-mat)) ;; FIXME TEST
   (type pred-reprod-2d)
   (fmat/shape pred-reprod-2d)
   (fmat/mat->array2d pred-reprod-2d)
 
   (def ra2dcomp (fmat/eigen-decomposition pred-reprod-2d))
   (def ra2dcomp (fmat/eigen-decomposition pred-reprod-2d {:backend :colt}))
-  (def evals (fmat/decomposition-component ra2dcomp :real-eigenvalues)) ; no imaginary parts in this case 
+  (def otherdecomp (fmat/eigen-decomposition (fmat/array2d->RealMatrix big-tran-mat) {:backend :colt})) ;; ALTERNATIVE TEST
+  (def evals (fmat/decomposition-component ra2dcomp :real-eigenvalues))
+  (def ievals (fmat/decomposition-component ra2dcomp :imag-eigenvalues))
   (def evecs (fmat/decomposition-component ra2dcomp :eigenvectors))
   (fmat/eigenvectors pred-reprod-2d) ; fails.  Tried various conversions
   (fmat/eigenvalues pred-reprod-2d) ; fails.  Tried various conversions
@@ -208,18 +170,15 @@ d
   (fmat/decomposition-component ra2dcomp :V)
   (type (fmat/decomposition-component ra2dcomp :V))
   (type evals) ; evals is Java vector not a Clojure vector
-  (fmat/decomposition-component ra2dcomp :imag-eigenvalues)
   (map fvec/vec->seq evecs)
 
   ;; test the eigenvector/value relationship for each pair:
+  ;; Only works with real eigenvalues
   (map #(fvec/delta-eq (fmat/mulv pred-reprod-2d %1) ; matrix-vector mult
                        (fvec/mult %1 %2)) ; vector-scalar mult
        evecs
        (vec evals))
 
-
-  (map (fn [evec] fmat/mulv pred-reprod-2d evec) evecs)
-  (map (fn [evec] fmat/mulv pred-reprod-2d evec) evecs)
 
 
 
@@ -241,8 +200,6 @@ d
 (def pred-reprod-plots (mapv uplot/plot-both pred-reprod-prob-states))
 )
 
-(clojure.repl/dir fastmath.matrix)
-
 ;pred-reprod-plots  ; display the plots
 
 
@@ -256,85 +213,3 @@ d
 )
 
 ;small-big-combo-plots   ; display the plots
-
-
-;; ----------------------------------------
-
-;; double-double, toil and trouble
-(def witch (mats/mkmat [[1 2 3 4]
-                        [5 6 7 8]
-                        [9 -1 -2 -3]
-                        [-4 -5 -6 -7]]))
-
-;; Note this takes four seqs, not a seq of seqs:
-(def truck (fmat/rows->mat4x4 [1 2 3 4]
-                              [5 6 7 8]
-                              [9 -1 -2 -3]
-                              [-4 -5 -6 -7]))
-
-(def witchdecomp (fmat/eigen-decomposition witch))
-(def truckdecomp (fmat/eigen-decomposition truck))
-
-(def tv (fmat/decomposition-component witchdecomp :V))
-(def wv (fmat/decomposition-component truckdecomp :V))
-(def td (fmat/decomposition-component witchdecomp :D))
-(def wd (fmat/decomposition-component truckdecomp :D))
-
-(fmat/eigenvalues witch)
-(fmat/eigenvalues truck)
-
-(fmat/eigenvectors witch)
-(fmat/eigenvectors truck)
-(fmat/eigenvectors witch true)
-(fmat/eigenvectors truck true)
-
-;; ----------------------------------------
-
-
-(def mdub (fm/seq->double-double-array [[1 2 3 4 5]
-                                        [6 7 8 9 10]
-                                        [-1 -2 -3 -4 -5]
-                                        [-6 -7 -8 -9 -10]
-                                        [1 2 3 4 5]]))
-(type mdub)
-
-(def m5x5 (fmat/rows->RealMatrix [[1 2 3 4 5]
-                                  [6 7 8 9 10]
-                                  [-1 -2 -3 -4 -5]
-                                  [-6 -7 -8 -9 -10]
-                                  [1 2 3 4 5]]))
-
-;(fmat/eigenvectors m5x5)
-; (err) Wrong number of args (5) passed to: fastmath.matrix/rows->mat
-
-;(fmat/eigenvalues-matrix m5x5)
-; (err) Wrong number of args (5) passed to: fastmath.matrix/rows->mat
-
-(def m5x5-decomp (fmat/eigen-decomposition m5x5))
-
-(fmat/decomposition-component m5x5-decomp :eigenvectors)
-(fmat/decomposition-component (fmat/eigen-decomposition m5x5) :eigenvectors)
-(map fvec/vec->seq
-     (fmat/decomposition-component m5x5-decomp :eigenvectors))
-
-;; These succeed:
-(fmat/eigenvalues m5x5)
-(fmat/decomposition-component m5x5-decomp :real-eigenvalues)
-(fmat/decomposition-component m5x5-decomp :imag-eigenvalues)
-
-(fmat/decomposition-component m5x5-decomp :V)
-; #object[org.apache.commons.math3.linear.Array2DRowRealMatrix 0xc83fff9 "Array2DRowRealMatrix
-; {{0.5379033159,-0.1179138184,1.4501010624,-1.0040216581,3.293351034},
-;  {0.4882862549,-0.9871935558,-0.8123428453,1.7903179275,-7.7549758304},
-;  {-0.5379033159,0.1179138184,-1.3828351958,-0.2704195191,3.4573201361},
-;  {-0.4882862549,0.9871935558,-0.5977053223,-0.8140281116,3.1768830828},
-;  {0.5379033159,-0.1179138184,1.3427823009,0.2981513614,-2.1725784226}}"]
-
-(fmat/decomposition-component m5x5-decomp :D)
-;#object[org.apache.commons.math3.linear.Array2DRowRealMatrix 0x276a9d93 "Array2DRowRealMatrix
-;{{0.5,3.1224989992,0.0,0.0,0.0},
-; {-3.1224989992,0.5,0.0,0.0,0.0},
-; {0.0,0.0,0.0,0.0,0.0},
-; {0.0,0.0,0.0,0.0,0.0},
-; {0.0,0.0,0.0,0.0,0.0}}"]
-
