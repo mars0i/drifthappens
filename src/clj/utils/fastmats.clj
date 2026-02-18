@@ -102,7 +102,7 @@
   "Test the eigenvector/eigenvalue relationship is correct. Returns a sequence
   of Clojure booleans."
   [m]
-  (let [decomp (fmat/eigen-decomposition pred-reprod-2d {:backend :colt})
+  (let [decomp (fmat/eigen-decomposition m {:backend :colt})
         evecs (fmat/decomposition-component decomp :eigenvectors)
         revals (fmat/decomposition-component decomp :real-eigenvalues)
         ievals (fmat/decomposition-component decomp :imag-eigenvalues)]

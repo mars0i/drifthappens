@@ -102,7 +102,6 @@
 (def N (dec (count big-pop-init)))
 (def M (dec (count small-pop-init)))
 
-(comment
 ;; Shrinking and expanding matrices.
 ;;
 ;; Note M and N are swapped in the next two
@@ -123,7 +122,6 @@
   mat.  It represents predation followed by reproductive growth."
   (fmat/mulm reprod-tran-mat predat-tran-mat))
 
-)
 
 (comment
   ;; experiments with eigenvecs/vals
