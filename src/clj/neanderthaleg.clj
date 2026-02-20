@@ -2,6 +2,7 @@
   (:require [uncomplicate.neanderthal
              [core :as nc]
              [native :as nn]
+             [linalg :as nla]
              ;[real :as nreal]
              [random :as nrand]
              ;[opencl :as ocl] ; didn't expect this to work
@@ -40,9 +41,30 @@
 
 
 
+
 (map identity (nn/dge 2 3 (range 6))) ;; lazy seq of 3 lazy pairs
 (ktn/fmap identity (nn/dge 2 3 (range 6))) ; same 2x3 mat
 (into [] (nn/dge 2 3 (range 6))) ; Clojure vector of lazy pairs
+
+
+(comment
+  ;; From
+  ;; https://dragan.rocks/articles/17/Clojure-Linear-Algebra-Refresher-Eigenvalues-and-Eigenvectors
+  (def a (nn/dge 2 2 [-4 3 -6 5]))
+  (def blah (nla/ev a))
+  ;; generate matrices that will be overwritten by ev! :
+  (def levecs (nn/dge 2 2)) ; no values given dge, so returns a zero matrix with the given shape
+  (def revecs (nn/dge 2 2))
+  (def evals (nn/dge 2 2))
+  (def eigenvalues (nla/ev! a evals levecs revecs))
+  (def eigenvalues (nla/ev! a))
+  (def lambda1 (nc/entry eigenvalues 0 0))
+  (def x1 (nc/col eigenvectors 0))
+  (def lambda2 (nc/entry eigenvalues 1 0))
+  (def x2 (nc/col eigenvectors 1)))
+
+
+)
 
 (comment
 
