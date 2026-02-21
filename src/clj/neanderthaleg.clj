@@ -47,24 +47,44 @@
 (into [] (nn/dge 2 3 (range 6))) ; Clojure vector of lazy pairs
 
 
-(comment
-  ;; From
-  ;; https://dragan.rocks/articles/17/Clojure-Linear-Algebra-Refresher-Eigenvalues-and-Eigenvectors
-  (def a (nn/dge 2 2 [-4 3 -6 5]))
-  (def blah (nla/ev a))
-  ;; generate matrices that will be overwritten by ev! :
-  (def levecs (nn/dge 2 2)) ; no values given dge, so returns a zero matrix with the given shape
-  (def revecs (nn/dge 2 2))
-  (def evals (nn/dge 2 2))
+;; based on
+;; https://dragan.rocks/articles/17/Clojure-Linear-Algebra-Refresher-Eigenvalues-and-Eigenvectors
+
+(def original-a (nn/dge 2 2 [-4 3 -6 5]))
+
+;; generate matrices that will be overwritten by ev! :
+(def a (nn/dge 2 2 original-a)) ; make a copy of original-a
+(def levecs (nn/dge 2 2)) ; no values given dge, so returns a zero matrix with the given shape
+(def revecs (nn/dge 2 2))
+(def evals (nn/dge 2 2))
+
+
+  ;; overwrites all of its arguments:
   (def eigenvalues (nla/ev! a evals levecs revecs))
-  (def eigenvalues (nla/ev! a))
-  (def lambda1 (nc/entry eigenvalues 0 0))
-  (def x1 (nc/col eigenvectors 0))
-  (def lambda2 (nc/entry eigenvalues 1 0))
-  (def x2 (nc/col eigenvectors 1)))
+
+  (def lambda1 (nc/entry eigenvalues 0 0)) ; extract first eigenval
+  (def x1 (nc/col revecs 0)) ; extract first eigenvec
+
+  (def lambda2 (nc/entry eigenvalues 1 0)) ; extract second eigenval
+  (def x2 (nc/col revecs 1)) ; extract second eigenvec
+
+(comment
+  ;; Does the eigenval/vec relationship work?
+  (nc/mv original-a x1)
+  (nc/scal lambda1 x1)
+  ;; Yes.
+  
+  ;; Does the eigenval/vec relationship work?
+  (nc/mv original-a x2)
+  (nc/scal lambda2 x2)
+  ;; Yes.
+
+  ;; Note that in the display of values the Conjure log displays the
+  ;; elements after rounding.
 
 
 )
+
 
 (comment
 
