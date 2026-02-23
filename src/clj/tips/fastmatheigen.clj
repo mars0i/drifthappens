@@ -25,7 +25,7 @@
 ;; ### Configuration and setup
 
 (def fit-B 1.0)
-(def big-fit-A 1.01)  ; large size has sel
+(def big-fit-A 1.0)  ; large size has sel
 (def small-fit-A 1.0) ; small size is pure drift
 (def interval 16) ; interval between generations to display
 (def half-interval (/ interval 2))
@@ -64,13 +64,21 @@
   (fmat/mat->array (fmat/decomposition-component smalldecompc :D))
   (fmat/mat->array (fmat/decomposition-component smalldecomp :V))
   (fmat/mat->array (fmat/decomposition-component smalldecompc :V))
-  (def evals(fmat/decomposition-component smalldecomp :real-eigenvalues))
+  (def evals (fmat/decomposition-component smalldecomp :real-eigenvalues))
   (def evalsc (fmat/decomposition-component smalldecompc :real-eigenvalues))
   (fmat/decomposition-component smalldecomp :imag-eigenvalues)
   (fmat/decomposition-component smalldecompc :imag-eigenvalues)
 
   (def evecs (fmat/decomposition-component smalldecomp :eigenvectors))
+  (map fvec/vec->seq evecs)
+  ;; The first eigenvector is (1,0,...,0).  The second consists of
+  ;; negative numbers, with -0.04 in the first place, very small negative
+  ;; numbers in most of the others, and -1 in the last (mod float slop).
+
   (def evecsc (fmat/decomposition-component smalldecompc :eigenvectors))
+  ;; The first eigenvector is (1,0,...,0).  The second consists of
+  ;; negative numbers, with -0.49 in the first place, very small negative
+  ;; numbers in most of the others, and -1 in the last (mod float slop).
 
   (fmat/mulv small-tran-mat (get evecsc 0))
   (fvec/mult (get evecsc 0) (get evalsc 0))
@@ -84,6 +92,7 @@
 
 )
 
+(comment
 ;; NOTE: Consider replacing choose-mat-powers-separately with choose-mat-powers-sequentially if the exponents are closely spaced; it might be more efficient:
 (def small-tran-mats 
   "A sequence of M-to-M transition matrices, each of which is small-tran-mat raised to a power."
@@ -97,6 +106,7 @@
 (def small-plots (mapv uplot/plot-both small-prob-states))
 
 ;small-plots  ; display the plots
+)
 
 ;; ---
 ;; ### Large populations
@@ -110,6 +120,7 @@
   "A single transition matrix for a big population."
   (wf/right-mult-tran-mat big-fit-A fit-B (dec (count big-pop-init)))) ; use fit-B for fit-A to make them equal
 
+(comment
 ;; NOTE: Consider replacing choose-mat-powers-separately with choose-mat-powers-sequentially if the exponents are closely spaced; it might be more efficient:
 (def big-tran-mats
   "A sequence of N-to-N transition matrices, each of which is big-tran-mat raised to a power."
@@ -123,6 +134,7 @@
 (def big-plots (mapv uplot/plot-lines big-prob-states))
 
 ;big-plots  ; display the plots
+)
 
 ;; ---
 ;; ### Alternating small/large populations
