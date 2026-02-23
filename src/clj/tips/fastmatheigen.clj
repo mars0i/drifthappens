@@ -30,11 +30,12 @@
 (def interval 16) ; interval between generations to display
 (def half-interval (/ interval 2))
 
-(def increments (iterate (partial + 16) 0))
+;(def increments (iterate (partial + 16) 0))
+(def increments (iterate (partial + 1) 0))
 (def generations increments)
 (def half-generations (map (fn [n] (/ n 2)) increments))
 
-(def num-gens 6)
+(def num-gens 100)
 
 ;; These next two values should even numbers so that when divided,
 ;; we'll get integers:
@@ -58,41 +59,34 @@
 
 (comment
   (fmat/shape small-tran-mat)
-  (def smalldecomp (fmat/eigen-decomposition small-tran-mat))
-  (def smalldecompc (fmat/eigen-decomposition small-tran-mat {:backend :colt}))
-  (fmat/mat->array (fmat/decomposition-component smalldecomp :D))
-  (fmat/mat->array (fmat/decomposition-component smalldecompc :D))
-  (fmat/mat->array (fmat/decomposition-component smalldecomp :V))
-  (fmat/mat->array (fmat/decomposition-component smalldecompc :V))
-  (def evals (fmat/decomposition-component smalldecomp :real-eigenvalues))
-  (def evalsc (fmat/decomposition-component smalldecompc :real-eigenvalues))
-  (fmat/decomposition-component smalldecomp :imag-eigenvalues)
-  (fmat/decomposition-component smalldecompc :imag-eigenvalues)
 
+  ;; Apache decomposition:
+  (def smalldecomp (fmat/eigen-decomposition small-tran-mat))
+  (fmat/mat->array (fmat/decomposition-component smalldecomp :D))
+  (fmat/mat->array (fmat/decomposition-component smalldecomp :V))
+  (def evals (fmat/decomposition-component smalldecomp :real-eigenvalues))
+  (fmat/decomposition-component smalldecomp :imag-eigenvalues)
   (def evecs (fmat/decomposition-component smalldecomp :eigenvectors))
   (map fvec/vec->seq evecs)
+
+  ;; Colt decomposition:
+  (def smalldecompc (fmat/eigen-decomposition small-tran-mat {:backend :colt}))
+  (fmat/mat->array (fmat/decomposition-component smalldecompc :D))
+  (fmat/mat->array (fmat/decomposition-component smalldecompc :V))
+  (def evalsc (fmat/decomposition-component smalldecompc :real-eigenvalues))
+  (fmat/decomposition-component smalldecompc :imag-eigenvalues)
   ;; The first eigenvector is (1,0,...,0).  The second consists of
   ;; negative numbers, with -0.04 in the first place, very small negative
   ;; numbers in most of the others, and -1 in the last (mod float slop).
-
   (def evecsc (fmat/decomposition-component smalldecompc :eigenvectors))
   ;; The first eigenvector is (1,0,...,0).  The second consists of
   ;; negative numbers, with -0.49 in the first place, very small negative
   ;; numbers in most of the others, and -1 in the last (mod float slop).
 
-  (fmat/mulv small-tran-mat (get evecsc 0))
-  (fvec/mult (get evecsc 0) (get evalsc 0))
-
-  (fmat/mulv small-tran-mat (get evecsc 1))
-  (fvec/mult (get evecsc 1) (get evalsc 1))
-
-  (fmat/mulv small-tran-mat (get evecsc 2))
-  (fvec/mult (get evecsc 2) (get evalsc 2))
-
 
 )
 
-(comment
+;(comment
 ;; NOTE: Consider replacing choose-mat-powers-separately with choose-mat-powers-sequentially if the exponents are closely spaced; it might be more efficient:
 (def small-tran-mats 
   "A sequence of M-to-M transition matrices, each of which is small-tran-mat raised to a power."
@@ -105,8 +99,8 @@
 ;; Plots made from the preceding sequence of states.
 (def small-plots (mapv uplot/plot-both small-prob-states))
 
-;small-plots  ; display the plots
-)
+small-plots  ; display the plots
+;)
 
 ;; ---
 ;; ### Large populations
@@ -232,7 +226,7 @@
 
 (comment
 ;; We use half-generations here because each step involves two sampling processes.  
-;; So each generation is analogous to two generations in the small and big models.
+;; so each generation is analogous to two generations in the small and big models.
 ;; NOTE: Consider replacing choose-mat-powers-separately with choose-mat-powers-sequentially if the exponents are closely spaced; it might be more efficient:
 (def pred-reprod-tran-mats
   "A sequence of N-to-N transition matrices, each of which is pred-reprod-mat raised to a power."
