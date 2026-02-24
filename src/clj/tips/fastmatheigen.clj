@@ -73,8 +73,16 @@
   (def smalldecompc (fmat/eigen-decomposition small-tran-mat {:backend :colt}))
   (fmat/mat->array (fmat/decomposition-component smalldecompc :D))
   (fmat/mat->array (fmat/decomposition-component smalldecompc :V))
-  (def evalsc (fmat/decomposition-component smalldecompc :real-eigenvalues))
+
   (fmat/decomposition-component smalldecompc :imag-eigenvalues)
+  (def evalsc (fmat/decomposition-component smalldecompc :real-eigenvalues))
+  ;; Ewens p. 22 says that the leading non-unit eigenvalue is
+  ;; $1-1/(2N)$ for a diploid model  This should be $1-1/N$ for
+  ;; haploid, or $(N-1)/N$.
+  ;; So for $N=10$, this is 0.9.  With $N=10$, the first two
+  ;; eigenvalues from both Apache and Colt above are approx 1,
+  ;; and the third eigenvalue is indeed approx 0.9.
+
   ;; The first eigenvector is (1,0,...,0).  The second consists of
   ;; negative numbers, with -0.04 in the first place, very small negative
   ;; numbers in most of the others, and -1 in the last (mod float slop).
@@ -82,7 +90,6 @@
   ;; The first eigenvector is (1,0,...,0).  The second consists of
   ;; negative numbers, with -0.49 in the first place, very small negative
   ;; numbers in most of the others, and -1 in the last (mod float slop).
-
 
 )
 
@@ -113,6 +120,37 @@ small-plots  ; display the plots
 (def big-tran-mat 
   "A single transition matrix for a big population."
   (wf/right-mult-tran-mat big-fit-A fit-B (dec (count big-pop-init)))) ; use fit-B for fit-A to make them equal
+
+(comment
+  (fmat/shape big-tran-mat)
+
+  ;; Apache decomposition doesn't work for this matrix:
+  (def bigdecomp (fmat/eigen-decomposition big-tran-mat))
+
+  ;; Colt decomposition:
+  (def bigdecompc (fmat/eigen-decomposition big-tran-mat {:backend :colt}))
+  (fmat/mat->array (fmat/decomposition-component bigdecompc :D))
+  (fmat/mat->array (fmat/decomposition-component bigdecompc :V))
+
+  ;; Note all of the imaginary components are zero, but the nonzero ones 
+  ;; are extremely small, so I'll ignore them:
+  (fmat/decomposition-component bigdecompc :imag-eigenvalues)
+  (def evalsc (fmat/decomposition-component bigdecompc :real-eigenvalues))
+
+  ;; Ewens p. 22 says that the leading non-unit eigenvalue is
+  ;; $1-1/(2N)$ for a diploid model  This should be $1-1/N$ for
+  ;; haploid, or $(N-1)/N$.
+  ;; So for $N=100$, this is 0.99.  With $N=100$, the first eigenvalue
+  ;; is exactly 1.0.  The second is close: 0.9999999999999993. 
+  ;; The third eigenvalue is 0.9899999999999993, which does round to 0.99.
+
+  (def evecsc (fmat/decomposition-component bigdecompc :eigenvectors))
+  (evecsc 0) ; 1 followed by 100 zeros.
+  (evecsc 1) ; last elem approx 1, first is 6.785, middles are very small.
+  (evecsc 2) ; first and last elem are approx 4.97; others are near -0.1, or -0.08 at either end
+
+)
+
 
 (comment
 ;; NOTE: Consider replacing choose-mat-powers-separately with choose-mat-powers-sequentially if the exponents are closely spaced; it might be more efficient:
