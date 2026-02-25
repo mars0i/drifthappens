@@ -69,6 +69,13 @@
   (def evecs (fmat/decomposition-component smalldecomp :eigenvectors))
   (map fvec/vec->seq evecs)
 
+  ;; A single multiplication of the initial state by the matrix:
+  (fmat/mulv small-tran-mat small-pop-init)
+  ;; Now can I do the same thing with the deomposition?
+  ;; First I need to rep the vec (small-pop-init) in terms of 
+  ;; the eigenvectors.
+
+
   ;; Colt decomposition:
   (def smalldecompc (fmat/eigen-decomposition small-tran-mat {:backend :colt}))
   (fmat/mat->array (fmat/decomposition-component smalldecompc :D))
