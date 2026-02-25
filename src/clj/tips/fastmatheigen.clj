@@ -86,6 +86,7 @@
   ;; Ewens p. 22 says that the leading non-unit eigenvalue is
   ;; $1-1/(2N)$ for a diploid model  This should be $1-1/N$ for
   ;; haploid, or $(N-1)/N$.
+  (double (- 1 (/ small-N)))
   ;; So for $N=10$, this is 0.9.  With $N=10$, the first two
   ;; eigenvalues from both Apache and Colt above are approx 1,
   ;; and the third eigenvalue is indeed approx 0.9.
