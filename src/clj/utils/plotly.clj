@@ -22,35 +22,48 @@
 
 (defn plot-lines
   "Plot lines connecting values in ys as y values with x representing the
-  index of the element in ys.  Lines are drawn from point to point."
-  [ys]
-  (-> (tc/dataset {:x (range (count ys))
-                   :y ys})
-      (plotly/layer-line  {:=x :x, :=y, :y})
-      plotly/plot
-      (assoc-in [:data 0 :line :width] 1)))
+  index of the element in ys.  Lines are drawn from point to point. If
+  present, header-string should contain Markdown to be displayed before the
+  plot."
+  ([ys] (plot-lines ys nil))
+  ([ys header-string]
+   (kind/fragment
+     [(kind/md header-string) ; ignored if arg is nil
+      (-> (tc/dataset {:x (range (count ys))
+                       :y ys})
+          (plotly/layer-line  {:=x :x, :=y, :y})
+          plotly/plot
+          (assoc-in [:data 0 :line :width] 1))])))
 
 (defn plot-dots
-  "Plot values in ys with dots t as y values with x representing the
-  index of the element in ys."
-  [ys]
-  (-> (tc/dataset {:x (range (count ys))
-                   :y ys})
-        (plotly/layer-point {:=x :x, :=y, :y});)
-      plotly/plot
-      (assoc-in [:data 0 :line :width] 1)))
+  "Plot values in ys with dots t as y values with x representing the index
+  of the element in ys.  If present, header-string should contain Markdown
+  to be displayed before the plot."
+  ([ys] (plot-dots ys nil))
+  ([ys header-string]
+   (kind/fragment
+     [(kind/md header-string) ; ignored if arg is nil
+      (-> (tc/dataset {:x (range (count ys))
+                       :y ys})
+          (plotly/layer-point {:=x :x, :=y, :y})
+          plotly/plot
+          (assoc-in [:data 0 :line :width] 1))])))
 
-(defn plot-both
+(defn plot-dots-lines
   "Plot lines connecting values in ys as y values with x representing the
-  index of the element in ys.  Dots are plotted for poijnts, and lines are
-  drawn from point to point."
-  [ys]
-  (-> (tc/dataset {:x (range (count ys))
-                   :y ys})
-        (plotly/layer-line  {:=x :x, :=y, :y});)
-        (plotly/layer-point {:=x :x, :=y, :y});)
-      plotly/plot
-      (assoc-in [:data 0 :line :width] 1)))
+  index of the element in ys.  Dots are plotted for points, and lines are
+  drawn from point to point.  If present, header-string should contain
+  Markdown to be displayed before the plot."
+  ([ys] (plot-dots-lines ys nil))
+  ([ys header-string]
+   (kind/fragment
+     [(kind/md header-string) ; ignored if arg is nil
+      (-> (tc/dataset {:x (range (count ys))
+                       :y ys})
+          (plotly/layer-line  {:=x :x, :=y, :y});)
+          (plotly/layer-point {:=x :x, :=y, :y});)
+          plotly/plot
+          (assoc-in [:data 0 :line :width] 1))])))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 

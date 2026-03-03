@@ -57,6 +57,105 @@
   "A single transition matrix for a small population."
   (wf/right-mult-tran-mat small-fit-A fit-B (dec (count small-pop-init))))
 
+;; NOTE: Consider replacing choose-mat-powers-separately with choose-mat-powers-sequentially if the exponents are closely spaced; it might be more efficient:
+(def small-tran-mats 
+  "A sequence of M-to-M transition matrices, each of which is small-tran-mat raised to a power."
+  (doall (mats/choose-mat-powers-separately small-tran-mat (take num-gens generations))))
+
+(def small-prob-states 
+  "States resulting from applying a product transition matrix to an initial state."
+  (mats/make-prob-states small-tran-mats small-pop-init))
+
+;; Plots made from the preceding sequence of states.
+(def small-plots (mapv uplot/plot-dots-lines small-prob-states))
+
+;small-plots  ; display the plots
+
+;; ---
+;; ### Large populations
+
+;(def big-pop-init 
+;  "A vector of initial probabilities of frequencies for a big population,
+;  typically with 1 as one element and zeros elswhere."
+;  (mats/mkvec (concat (repeat half-big-N 0.0) [1.0] (repeat half-big-N 0.0))))
+
+;; alt init cond doesn't seem to work
+;(def big-pop-init (mats/mkvec (assoc (vec (repeat (inc big-N) 0)) 5 1)))
+
+(def big-tran-mat 
+  "A single transition matrix for a big population."
+  (wf/right-mult-tran-mat big-fit-A fit-B (dec (count big-pop-init)))) ; use fit-B for fit-A to make them equal
+
+;; NOTE: Consider replacing choose-mat-powers-separately with choose-mat-powers-sequentially if the exponents are closely spaced; it might be more efficient:
+(def big-tran-mats
+  "A sequence of N-to-N transition matrices, each of which is big-tran-mat raised to a power."
+  (doall (mats/choose-mat-powers-separately big-tran-mat (take num-gens generations))))
+
+(def big-prob-states 
+  "States resulting from applying a product transition matrix to an initial state."
+  (mats/make-prob-states big-tran-mats big-pop-init))
+
+;; Plots made from the preceding sequence of states.
+(def big-plots (mapv uplot/plot-lines big-prob-states))
+
+;big-plots  ; display the plots
+
+;; ---
+;; ### Alternating small/large populations
+
+(def N (dec (count big-pop-init)))
+(def M (dec (count small-pop-init)))
+
+;; Shrinking and expanding matrices.
+;;
+;; Note M and N are swapped in the next two
+(def predat-tran-mat
+  "A transition matrix from a population of size N to a smaller population
+  of size M resulting from predation."
+  (wf/right-mult-tran-mat small-fit-A fit-B N M)) ; 
+
+(def reprod-tran-mat
+  "A transition matrix from a population of size M to a larger population
+  of size N due to reproduction."
+  (wf/right-mult-tran-mat big-fit-A fit-B M N)) ; use fit-B for fit-A to make them equal
+
+;; Combine into one square matrix:
+(def pred-reprod-mat 
+  "A transition matrix from a populatiion of size N to a population of the
+  same size. The matrix is the product of predat-tran-mat and reprod-drift
+  mat.  It represents predation followed by reproductive growth."
+  (fmat/mulm reprod-tran-mat predat-tran-mat))
+
+
+;; We use half-generations here because each step involves two sampling processes.  
+;; so each generation is analogous to two generations in the small and big models.
+;; NOTE: Consider replacing choose-mat-powers-separately with choose-mat-powers-sequentially if the exponents are closely spaced; it might be more efficient:
+(def pred-reprod-tran-mats
+  "A sequence of N-to-N transition matrices, each of which is pred-reprod-mat raised to a power."
+  (doall (mats/choose-mat-powers-separately pred-reprod-mat (take num-gens half-generations))))
+
+(def pred-reprod-prob-states
+  "States resulting from applying a product transition matrix to an initial state."
+  (mats/make-prob-states pred-reprod-tran-mats big-pop-init))
+
+;; Plots made from the preceding sequence of states.
+(def pred-reprod-plots (mapv uplot/plot-dots-lines pred-reprod-prob-states))
+
+;pred-reprod-plots  ; display the plots
+
+
+;; ---
+; ### Plots from all three populations:
+
+(def small-big-combo-plots 
+  "States resulting from alternating plots from other sequences of plots."
+  (interleave small-plots big-plots pred-reprod-plots))
+
+small-big-combo-plots   ; display the plots
+
+;; -------------------------------
+;; ### Experiments
+
 (comment
   (fmat/shape small-tran-mat)
 
@@ -98,36 +197,7 @@
   ;; The first eigenvector is (1,0,...,0).  The second consists of
   ;; negative numbers, with -0.49 in the first place, very small negative
   ;; numbers in most of the others, and -1 in the last (mod float slop).
-
 )
-
-;(comment
-;; NOTE: Consider replacing choose-mat-powers-separately with choose-mat-powers-sequentially if the exponents are closely spaced; it might be more efficient:
-(def small-tran-mats 
-  "A sequence of M-to-M transition matrices, each of which is small-tran-mat raised to a power."
-  (doall (mats/choose-mat-powers-separately small-tran-mat (take num-gens generations))))
-
-(def small-prob-states 
-  "States resulting from applying a product transition matrix to an initial state."
-  (mats/make-prob-states small-tran-mats small-pop-init))
-
-;; Plots made from the preceding sequence of states.
-(def small-plots (mapv uplot/plot-both small-prob-states))
-
-small-plots  ; display the plots
-;)
-
-;; ---
-;; ### Large populations
-
-(def big-pop-init 
-  "A vector of initial probabilities of frequencies for a big population,
-  typically with 1 as one element and zeros elswhere."
-  (mats/mkvec (concat (repeat half-big-N 0.0) [1.0] (repeat half-big-N 0.0))))
-
-(def big-tran-mat 
-  "A single transition matrix for a big population."
-  (wf/right-mult-tran-mat big-fit-A fit-B (dec (count big-pop-init)))) ; use fit-B for fit-A to make them equal
 
 (comment
   (fmat/shape big-tran-mat)
@@ -156,52 +226,7 @@ small-plots  ; display the plots
   (evecsc 0) ; 1 followed by 100 zeros.
   (evecsc 1) ; last elem approx 1, first is 6.785, middles are very small.
   (evecsc 2) ; first and last elem are approx 4.97; others are near -0.1, or -0.08 at either end
-
 )
-
-
-(comment
-;; NOTE: Consider replacing choose-mat-powers-separately with choose-mat-powers-sequentially if the exponents are closely spaced; it might be more efficient:
-(def big-tran-mats
-  "A sequence of N-to-N transition matrices, each of which is big-tran-mat raised to a power."
-  (doall (mats/choose-mat-powers-separately big-tran-mat (take num-gens generations))))
-
-(def big-prob-states 
-  "States resulting from applying a product transition matrix to an initial state."
-  (mats/make-prob-states big-tran-mats big-pop-init))
-
-;; Plots made from the preceding sequence of states.
-(def big-plots (mapv uplot/plot-lines big-prob-states))
-
-;big-plots  ; display the plots
-)
-
-;; ---
-;; ### Alternating small/large populations
-
-(def N (dec (count big-pop-init)))
-(def M (dec (count small-pop-init)))
-
-;; Shrinking and expanding matrices.
-;;
-;; Note M and N are swapped in the next two
-(def predat-tran-mat
-  "A transition matrix from a population of size N to a smaller population
-  of size M resulting from predation."
-  (wf/right-mult-tran-mat small-fit-A fit-B N M)) ; 
-
-(def reprod-tran-mat
-  "A transition matrix from a population of size M to a larger population
-  of size N due to reproduction."
-  (wf/right-mult-tran-mat big-fit-A fit-B M N)) ; use fit-B for fit-A to make them equal
-
-;; Combine into one square matrix:
-(def pred-reprod-mat 
-  "A transition matrix from a populatiion of size N to a population of the
-  same size. The matrix is the product of predat-tran-mat and reprod-drift
-  mat.  It represents predation followed by reproductive growth."
-  (fmat/mulm reprod-tran-mat predat-tran-mat))
-
 
 (comment
   ;; experiments with eigenvecs/vals
@@ -264,39 +289,5 @@ small-plots  ; display the plots
                        (fvec/mult %1 %2)) ; vector-scalar mult
        evecs
        (vec evals))
-
-
-
-
 )
-
-(comment
-;; We use half-generations here because each step involves two sampling processes.  
-;; so each generation is analogous to two generations in the small and big models.
-;; NOTE: Consider replacing choose-mat-powers-separately with choose-mat-powers-sequentially if the exponents are closely spaced; it might be more efficient:
-(def pred-reprod-tran-mats
-  "A sequence of N-to-N transition matrices, each of which is pred-reprod-mat raised to a power."
-  (doall (mats/choose-mat-powers-separately pred-reprod-mat (take num-gens half-generations))))
-
-(def pred-reprod-prob-states
-  "States resulting from applying a product transition matrix to an initial state."
-  (mats/make-prob-states pred-reprod-tran-mats big-pop-init))
-
-;; Plots made from the preceding sequence of states.
-(def pred-reprod-plots (mapv uplot/plot-both pred-reprod-prob-states))
-)
-
-;pred-reprod-plots  ; display the plots
-
-
-;; ---
-; ### Plots from all three populations:
-
-(comment
-(def small-big-combo-plots 
-  "States resulting from alternating plots from other sequences of plots."
-  (interleave small-plots big-plots pred-reprod-plots))
-)
-
-;small-big-combo-plots   ; display the plots
 

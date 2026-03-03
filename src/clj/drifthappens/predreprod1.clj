@@ -66,14 +66,16 @@
 ;; NOTE: Consider replacing choose-mat-powers-separately with choose-mat-powers-sequentially if the exponents are closely spaced; it might be more efficient:
 (def small-tran-mats 
   "A sequence of M-to-M transition matrices, each of which is small-tran-mat raised to a power."
-  (doall (mats/choose-mat-powers-separately small-tran-mat (take num-gens generations))))
+  (mats/choose-mat-powers-separately small-tran-mat (take num-gens generations)))
 
 (def small-prob-states 
   "States resulting from applying a product transition matrix to an initial state."
   (mats/make-prob-states small-tran-mats small-pop-init))
 
 ;; Plots made from the preceding sequence of states.
-(def small-plots (mapv uplot/plot-both small-prob-states))
+(def small-plots (mapv uplot/plot-dots-lines
+                       small-prob-states
+                       (repeat (str "### $M=" small-N "$"))))
 
 ;small-plots  ; display the plots
 
@@ -92,14 +94,16 @@
 ;; NOTE: Consider replacing choose-mat-powers-separately with choose-mat-powers-sequentially if the exponents are closely spaced; it might be more efficient:
 (def big-tran-mats
   "A sequence of N-to-N transition matrices, each of which is big-tran-mat raised to a power."
-  (doall (mats/choose-mat-powers-separately big-tran-mat (take num-gens generations))))
+  (mats/choose-mat-powers-separately big-tran-mat (take num-gens generations)))
 
 (def big-prob-states 
   "States resulting from applying a product transition matrix to an initial state."
   (mats/make-prob-states big-tran-mats big-pop-init))
 
 ;; Plots made from the preceding sequence of states.
-(def big-plots (mapv uplot/plot-lines big-prob-states))
+(def big-plots (mapv uplot/plot-lines
+                     big-prob-states
+                       (repeat (str "### $N=" big-N "$"))))
 
 ;big-plots  ; display the plots
 
@@ -134,14 +138,16 @@
 ;; NOTE: Consider replacing choose-mat-powers-separately with choose-mat-powers-sequentially if the exponents are closely spaced; it might be more efficient:
 (def pred-reprod-tran-mats
   "A sequence of N-to-N transition matrices, each of which is pred-reprod-mat raised to a power."
-  (doall (mats/choose-mat-powers-separately pred-reprod-mat (take num-gens half-generations))))
+  (mats/choose-mat-powers-separately pred-reprod-mat (take num-gens half-generations)))
 
 (def pred-reprod-prob-states
   "States resulting from applying a product transition matrix to an initial state."
   (mats/make-prob-states pred-reprod-tran-mats big-pop-init))
 
 ;; Plots made from the preceding sequence of states.
-(def pred-reprod-plots (mapv uplot/plot-both pred-reprod-prob-states))
+(def pred-reprod-plots (mapv uplot/plot-dots-lines 
+                              pred-reprod-prob-states
+                              (repeat (str "### $M=" small-N "$, $N=" big-N "$"))))
 
 ;pred-reprod-plots  ; display the plots
 
@@ -153,5 +159,5 @@
   "States resulting from alternating plots from other sequences of plots."
   (interleave small-plots big-plots pred-reprod-plots))
 
-;small-big-combo-plots   ; display the plots
+small-big-combo-plots   ; display the plots
 
