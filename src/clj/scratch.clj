@@ -14,3 +14,24 @@
             [utils.misc :as umisc])
   (:import [fastmath.vector Vec2 Vec3 Vec4]
            [fastmath.matrix Mat2x2 Mat3x3 Mat4x4]))
+
+
+(defn binomdist
+  [N p]
+  (frand/distribution :binomial {:p p :trials N}))
+
+(def maxN 300)
+
+(def N (double 10))
+
+(def mybinom (binomdist N 0.5))
+
+(def yo
+  (concat
+    (map (fn [x] (.probability mybinom x)) (umisc/irange N))
+    (repeat (- maxN N) 0)))
+
+
+(uplot/plot-dots-lines yo)
+
+
