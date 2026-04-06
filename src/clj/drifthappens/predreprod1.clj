@@ -27,6 +27,10 @@
   (:import [fastmath.vector Vec2 Vec3 Vec4]
            [fastmath.matrix Mat2x2 Mat3x3 Mat4x4]))
 
+;; FIXME ?
+;; Because the plotly plots are including x and y axes at 0, it can be
+;; misleading that there's a line that goes up to the top of the plot
+;; at zero, when the probability of zero is less than that upper value.
 
 ;; ---
 ;; ### Configuration and setup
@@ -45,8 +49,8 @@
 
 ;; These next two values should even numbers so that when divided,
 ;; we'll get integers:
-(def small-N 10)
-(def big-N 1000)
+(def small-N 100)
+(def big-N 2000)
 
 (def half-small-N (/ small-N 2))
 (def half-big-N (/ big-N 2))
@@ -63,10 +67,12 @@
   "A single transition matrix for a small population."
   (wf/right-mult-tran-mat small-fit-A fit-B (dec (count small-pop-init))))
 
-;; NOTE: Consider replacing choose-mat-powers-separately with choose-mat-powers-sequentially if the exponents are closely spaced; it might be more efficient:
+;; NOTE: Consider replacing choose-mat-powers-parallel with 
+;; choose-mat-powers-sequentially if the exponents are closely spaced; might be more efficient.
+;; Or consider choose-mat-powers-parallel. 
 (def small-tran-mats 
   "A sequence of M-to-M transition matrices, each of which is small-tran-mat raised to a power."
-  (mats/choose-mat-powers-separately small-tran-mat (take num-gens generations)))
+  (mats/choose-mat-powers-parallel small-tran-mat (take num-gens generations)))
 
 (def small-prob-states 
   "States resulting from applying a product transition matrix to an initial state."
@@ -92,10 +98,12 @@
   "A single transition matrix for a big population."
   (wf/right-mult-tran-mat big-fit-A fit-B (dec (count big-pop-init)))) ; use fit-B for fit-A to make them equal
 
-;; NOTE: Consider replacing choose-mat-powers-separately with choose-mat-powers-sequentially if the exponents are closely spaced; it might be more efficient:
+;; NOTE: Consider replacing choose-mat-powers-parallel with 
+;; choose-mat-powers-sequentially if the exponents are closely spaced; might be more efficient.
+;; Or consider choose-mat-powers-parallel. 
 (def big-tran-mats
   "A sequence of N-to-N transition matrices, each of which is big-tran-mat raised to a power."
-  (mats/choose-mat-powers-separately big-tran-mat (take num-gens generations)))
+  (mats/choose-mat-powers-parallel big-tran-mat (take num-gens generations)))
 
 (def big-prob-states 
   "States resulting from applying a product transition matrix to an initial state."
@@ -137,10 +145,12 @@
 
 ;; We use half-generations here because each step involves two sampling processes.  
 ;; So each generation is analogous to two generations in the small and big models.
-;; NOTE: Consider replacing choose-mat-powers-separately with choose-mat-powers-sequentially if the exponents are closely spaced; it might be more efficient:
+;; NOTE: Consider replacing choose-mat-powers-parallel with 
+;; choose-mat-powers-sequentially if the exponents are closely spaced; might be more efficient.
+;; Or consider choose-mat-powers-parallel. 
 (def pred-reprod-tran-mats
   "A sequence of N-to-N transition matrices, each of which is pred-reprod-mat raised to a power."
-  (mats/choose-mat-powers-separately pred-reprod-mat (take num-gens half-generations)))
+  (mats/choose-mat-powers-parallel pred-reprod-mat (take num-gens half-generations)))
 
 (def pred-reprod-prob-states
   "States resulting from applying a product transition matrix to an initial state."

@@ -59,7 +59,8 @@
   finite, but may be in any order). Exponents must be nonnegative integers,
   which may be in a float representation. (Use
   choose-mat-powers-sequentially for closely spaced exponents; use
-  choose-mat-powers-separately for widely space exponents.)"
+  choose-mat-powers-separately or choose-mat-powers-parallel for widely
+  spaced exponents.)"
   [m expts]
   (let [expts-set (set (map long expts))
         n (count expts-set)] ; don't count dupes
@@ -72,9 +73,22 @@
   finite, but may be in any order). Exponents must be nonnegative integers,
   which may be in a float representation. (Use
   choose-mat-powers-sequentially for closely spaced exponents; use
-  choose-mat-powers-separately for widely space exponents.)"
+  choose-mat-powers-separately or choose-mat-powers-parallel for widely
+  spaced exponents.)"
   [m expts]
   (map (partial mpow m) (map long expts)))
+
+(defn choose-mat-powers-parallel
+  "Like choose-mat-powers-separately, but uses pmap rather than map.
+  Returns a lazy sequence of transition matrices that are integer powers
+  of square matrix m for each exponent in collection expts (which should be
+  finite, but may be in any order). Exponents must be nonnegative integers,
+  which may be in a float representation. (Use
+  choose-mat-powers-sequentially for closely spaced exponents; use
+  choose-mat-powers-separately or choose-mat-powers-parallel for widely
+  spaced exponents.)"
+  [m expts]
+  (pmap (partial mpow m) (map long expts)))
 
 
 (defn mat-squares
