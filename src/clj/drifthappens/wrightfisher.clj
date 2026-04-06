@@ -101,8 +101,6 @@
 
 ;; ---
 
-;; TODO NEED MORE TESTS OF THESE TWO VERSIONS
-
 (defn tran-mat-elems
   "Creates a sequence of sequences of transition matrix elements that can
   be passsed to left-mult-tran-mat or right-mult-tran-mat.  The sum of

@@ -77,7 +77,8 @@
                        small-prob-states
                        (repeat (str "### $M=" small-N "$"))))
 
-;small-plots  ; display the plots
+;; DISPLAY PLOTS:
+;small-plots
 
 ;; ---
 ;; ### Large populations
@@ -105,7 +106,8 @@
                      big-prob-states
                        (repeat (str "### $N=" big-N "$"))))
 
-;big-plots  ; display the plots
+;; DISPLAY PLOTS:
+;big-plots
 
 ;; ---
 ;; ### Alternating small/large populations
@@ -149,7 +151,8 @@
                               pred-reprod-prob-states
                               (repeat (str "### $M=" small-N "$, $N=" big-N "$"))))
 
-;pred-reprod-plots  ; display the plots
+;; DISPLAY PLOTS:
+;pred-reprod-plots
 
 
 ;; ---
@@ -159,5 +162,6 @@
   "States resulting from alternating plots from other sequences of plots."
   (interleave small-plots big-plots pred-reprod-plots))
 
-small-big-combo-plots   ; display the plots
+;; DISPLAY PLOTS:
+small-big-combo-plots
 
