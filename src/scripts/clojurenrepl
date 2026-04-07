@@ -1,3 +1,23 @@
 #!/bin/sh
-exec clojure -M:nrepl-server "$@"  # uses nepl-server alias I defined in deps.edn
+
+addlaliases=""
+
+if [ "$1" = "-?" -o "$1" = "-h" -o "$1" = "--help" ]; then
+  echo Usage: $0 "[ :<alias list> ] [ <other args> ]"
+  echo "If first arg starts with ':', it's treated as a list of additional aliases"
+  echo to be appeneded to '-M:nreplserver', shifting that list out of args.
+  exit 1
+fi
+
+if [ "$1" ]; then
+  if [ "$1" != "${1#:}" ]; then
+    addlaliases="$1"
+    shift
+  fi
+fi
+
+set -x
+
+exec clojure -M:nrepl-server$addlaliases "$@"  # uses nepl-server alias I defined in deps.edn
+
 # More info here: https://nrepl.org/nrepl/usage/server.html
