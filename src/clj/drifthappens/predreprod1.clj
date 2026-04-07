@@ -32,6 +32,10 @@
 ;; misleading that there's a line that goes up to the top of the plot
 ;; at zero, when the probability of zero is less than that upper value.
 
+;; TODO Possibly make the defs into lets and wrap everthing in
+;; this file in a single function.  It can still be hacked at will, but
+;; that would make it easier to benchmark with critierium.
+
 ;; ---
 ;; ### Configuration and setup
 
@@ -47,10 +51,10 @@
 
 (def num-gens 6)
 
-;; These next two values should even numbers so that when divided,
-;; we'll get integers:
+;; These next two values should be even numbers so that when
+;; divided by 2, we'll get integers:
 (def small-N 100)
-(def big-N 2000)
+(def big-N 5000)
 
 (def half-small-N (/ small-N 2))
 (def half-big-N (/ big-N 2))
@@ -158,8 +162,8 @@
 
 ;; Plots made from the preceding sequence of states.
 (def pred-reprod-plots (mapv uplot/plot-dots-lines 
-                              pred-reprod-prob-states
-                              (repeat (str "### $M=" small-N "$, $N=" big-N "$"))))
+                             pred-reprod-prob-states
+                             (repeat (str "### $M=" small-N "$, $N=" big-N "$"))))
 
 ;; DISPLAY PLOTS:
 ;pred-reprod-plots
@@ -170,8 +174,11 @@
 
 (def small-big-combo-plots 
   "States resulting from alternating plots from other sequences of plots."
-  (interleave small-plots big-plots pred-reprod-plots))
+  (interleave small-plots big-plots pred-reprod-plots)
+)
 
 ;; DISPLAY PLOTS:
 small-big-combo-plots
 
+;; simplistic time reporting
+(str (java.time.LocalDateTime/now))
