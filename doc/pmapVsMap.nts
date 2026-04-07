@@ -1,0 +1,36 @@
+pmapVsMap.nts
+
+I did tests of predreprod.clj (commit 42af903) using the new
+choose-mat-powers-parallel, which is the same as
+choose-mat-powers-separately but uses pmap rather than map.
+
+This comment has:
+
+(def fit-B 1.0)
+(def big-fit-A 1.01)  ; large size has sel
+(def small-fit-A 1.0) ; small size is pure drift
+(def interval 16) 
+(def num-gens 6) ; number of generation states to display
+(def small-N 100) ; M
+(def big-N 5000)  ; N
+
+On my 2025 MBA, using the production and bench aliases from
+deps.edn (but I didn't use Criterium, which is what bench
+provides), [allows java to use 20GB], my hand timing showed that
+evaluating predpreprod.clj entirely, and sending to Clay, took
+from 20:45 until 21:10, i.e. 25 minutes.
+
+(Might use criterium later, but this is probably OK; since the
+process runs for so long, so there's probably sufficient
+burn-in.)
+
+The output plots did indeed show that the predation step turns
+the whole thing into roughly drift, in that after a pure drift
+M=100 process makes the probabilities of intermediate states
+nearly zero, the two-step process also has probabilities near
+zero for all intermediate states.  However, there's a difference,
+which is that in the two-step process, you can see the effect of
+selection in that the selected fixation state has a significantly
+higher probability than the other fixation state.
+
+[I can probably get these values using eigenvalues or something.]
