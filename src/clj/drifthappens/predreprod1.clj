@@ -179,8 +179,7 @@
 
 (def small-big-combo-plots 
   "States resulting from alternating plots from other sequences of plots."
-  (interleave small-plots big-plots pred-reprod-plots)
-)
+  (interleave small-plots big-plots pred-reprod-plots))
 
 ;; DISPLAY PLOTS:
 small-big-combo-plots
