@@ -12,7 +12,7 @@
 (def plot-steps 400)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; CONVENIENCE PLOTTING FUNCTIONS
+;; CONVENIENCE PLOTLY PLOTTING FUNCTIONS
 
 ;; One way to add a label before a plot:
 ;  (kind/fragment
