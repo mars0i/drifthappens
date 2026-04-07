@@ -43,12 +43,17 @@
 (def big-fit-A 1.01)  ; large size has sel
 (def small-fit-A 1.0) ; small size is pure drift
 (def interval 16) ; interval between generations to display
-(def half-interval (/ interval 2))
+;(def half-interval (/ interval 2)) ; superceded by half-generations
 
-(def increments (iterate (partial + 16) 0))
+(def increments (iterate (partial + interval) 0))
 (def generations increments)
 (def half-generations (map (fn [n] (/ n 2)) increments))
 
+;; Number of generation states to display from a sequence of such states.
+;; that are generations apart.  So e.g. if num-gens = 6, and generations =
+;; 16, then using the def of hafl-generations above, the last generation 
+;; displayed is 16 * (6 - 1) = 80 [since the first displayed generation is 
+;; generation 0].
 (def num-gens 6)
 
 ;; These next two values should be even numbers so that when
@@ -76,7 +81,7 @@
 ;; Or consider choose-mat-powers-parallel. 
 (def small-tran-mats 
   "A sequence of M-to-M transition matrices, each of which is small-tran-mat raised to a power."
-  (mats/choose-mat-powers-parallel small-tran-mat (take num-gens generations)))
+  (mats/choose-mat-powers-separately small-tran-mat (take num-gens generations)))
 
 (def small-prob-states 
   "States resulting from applying a product transition matrix to an initial state."
@@ -107,7 +112,7 @@
 ;; Or consider choose-mat-powers-parallel. 
 (def big-tran-mats
   "A sequence of N-to-N transition matrices, each of which is big-tran-mat raised to a power."
-  (mats/choose-mat-powers-parallel big-tran-mat (take num-gens generations)))
+  (mats/choose-mat-powers-separately big-tran-mat (take num-gens generations)))
 
 (def big-prob-states 
   "States resulting from applying a product transition matrix to an initial state."
@@ -154,7 +159,7 @@
 ;; Or consider choose-mat-powers-parallel. 
 (def pred-reprod-tran-mats
   "A sequence of N-to-N transition matrices, each of which is pred-reprod-mat raised to a power."
-  (mats/choose-mat-powers-parallel pred-reprod-mat (take num-gens half-generations)))
+  (mats/choose-mat-powers-separately pred-reprod-mat (take num-gens half-generations)))
 
 (def pred-reprod-prob-states
   "States resulting from applying a product transition matrix to an initial state."
