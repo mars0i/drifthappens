@@ -20,6 +20,16 @@
 ;     ;plotly stuff here
 ;     ])
 
+
+;; TODO To merge in somewhere (?):
+;;     :layout {:yaxis {:zeroline false}}
+;; i.e. get rid of vertical y axis line at 0, which makes the display
+;; of exitinction probability confusing.
+;; I think like this:
+;;    (assoc-in [:layout :yaxis] {:zeroline false})
+;; See 
+;; https://plotly.com/javascript/line-charts/#colored-and-styled-scatter-plot
+;; https://plotly.com/javascript/reference/layout/yaxis/#layout-yaxis-zeroline
 (defn plot-lines
   "Plot lines connecting values in ys as y values with x representing the
   index of the element in ys.  Lines are drawn from point to point. If
@@ -33,7 +43,8 @@
                        :y ys})
           (plotly/layer-line  {:=x :x, :=y, :y})
           plotly/plot
-          (assoc-in [:data 0 :line :width] 1))])))
+          (assoc-in [:layout :yaxis] {:zeroline false}) ; EXPERIMENT: supposed to get rid of y axis line at 0
+          (assoc-in [:data 0 :line :width] 1))]))) ; width of plot line (?)
 
 (defn plot-dots
   "Plot values in ys with dots t as y values with x representing the index
@@ -47,7 +58,8 @@
                        :y ys})
           (plotly/layer-point {:=x :x, :=y, :y})
           plotly/plot
-          (assoc-in [:data 0 :line :width] 1))])))
+          ;(assoc-in [:data 0 :line :width] 1) ; irrelevant to dots?
+          )])))
 
 (defn plot-dots-lines
   "Plot lines connecting values in ys as y values with x representing the
