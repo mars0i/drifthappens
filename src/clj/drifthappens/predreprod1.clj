@@ -39,6 +39,16 @@
 ;; ---
 ;; ### Configuration and setup
 
+;; WHICH MATRIX POWERS FUNCTION?
+;; Consider using choose-mat-powers-sequentially if the exponents are
+;; closely spaced; that might be more efficient.
+;; Or consider choose-mat-powers-parallel, which is
+;; choose-matrix-powers-separately, but using pmap rather than map. 
+;;
+;(def choose-mat-powers mats/choose-mat-powers-sequentially)
+;(def choose-mat-powers mats/choose-mat-powers-separately)
+(def choose-mat-powers mats/choose-mat-powers-parallel)
+
 (def fit-B 1.0)
 (def big-fit-A 1.01)  ; large size has sel
 (def small-fit-A 1.0) ; small size is pure drift
@@ -58,7 +68,7 @@
 
 ;; These next two values should be even numbers so that when
 ;; divided by 2, we'll get integers:
-(def small-N 100)
+(def small-N 500)
 (def big-N 5000)
 
 (def half-small-N (/ small-N 2))
@@ -76,12 +86,9 @@
   "A single transition matrix for a small population."
   (wf/right-mult-tran-mat small-fit-A fit-B (dec (count small-pop-init))))
 
-;; NOTE: Consider replacing choose-mat-powers-parallel with 
-;; choose-mat-powers-sequentially if the exponents are closely spaced; might be more efficient.
-;; Or consider choose-mat-powers-parallel. 
 (def small-tran-mats 
   "A sequence of M-to-M transition matrices, each of which is small-tran-mat raised to a power."
-  (mats/choose-mat-powers-separately small-tran-mat (take num-gens generations)))
+  (choose-mat-powers small-tran-mat (take num-gens generations)))
 
 (def small-prob-states 
   "States resulting from applying a product transition matrix to an initial state."
@@ -107,12 +114,9 @@
   "A single transition matrix for a big population."
   (wf/right-mult-tran-mat big-fit-A fit-B (dec (count big-pop-init)))) ; use fit-B for fit-A to make them equal
 
-;; NOTE: Consider replacing choose-mat-powers-parallel with 
-;; choose-mat-powers-sequentially if the exponents are closely spaced; might be more efficient.
-;; Or consider choose-mat-powers-parallel. 
 (def big-tran-mats
   "A sequence of N-to-N transition matrices, each of which is big-tran-mat raised to a power."
-  (mats/choose-mat-powers-separately big-tran-mat (take num-gens generations)))
+  (choose-mat-powers big-tran-mat (take num-gens generations)))
 
 (def big-prob-states 
   "States resulting from applying a product transition matrix to an initial state."
@@ -154,12 +158,9 @@
 
 ;; We use half-generations here because each step involves two sampling processes.  
 ;; So each generation is analogous to two generations in the small and big models.
-;; NOTE: Consider replacing choose-mat-powers-parallel with 
-;; choose-mat-powers-sequentially if the exponents are closely spaced; might be more efficient.
-;; Or consider choose-mat-powers-parallel. 
 (def pred-reprod-tran-mats
   "A sequence of N-to-N transition matrices, each of which is pred-reprod-mat raised to a power."
-  (mats/choose-mat-powers-separately pred-reprod-mat (take num-gens half-generations)))
+  (choose-mat-powers pred-reprod-mat (take num-gens half-generations)))
 
 (def pred-reprod-prob-states
   "States resulting from applying a product transition matrix to an initial state."
