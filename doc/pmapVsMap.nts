@@ -1,8 +1,8 @@
 pmapVsMap.nts
 
 I did tests of predreprod.clj (commit 42af903) using the new
-choose-mat-powers-parallel, which is the same as
-choose-mat-powers-separately but uses pmap rather than map.
+choose-mat-powers-parallel (which is the same as
+choose-mat-powers-separately but uses pmap rather than map).
 
 This comment has:
 
@@ -19,6 +19,12 @@ deps.edn (but I didn't use Criterium, which is what bench
 provides), [allows java to use 20GB], my hand timing showed that
 evaluating predpreprod.clj entirely, and sending to Clay, took
 from 20:45 until 21:10, i.e. 25 minutes.
+
+Then I ran it in a new sesson (also with production and bench)
+choose-mat-powers-separately, and it took a little more than three
+hours (3 hrs, 2 mins).
+
+SO THE pmap VERSION choose-mat-powers-parallel IS A BIG WIN!
 
 (Might use criterium later, but this is probably OK; since the
 process runs for so long, so there's probably sufficient
