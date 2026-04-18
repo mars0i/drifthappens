@@ -1,5 +1,5 @@
 (ns scratch
-  (:require ;[clojure.math :as m]
+  (:require [clojure.math :as m]
             ;[criterium.core :as crit]
             [fastmath.vector :as fvec]
             [fastmath.matrix :as fmat]
