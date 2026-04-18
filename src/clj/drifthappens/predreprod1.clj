@@ -27,7 +27,7 @@
   (:import [fastmath.vector Vec2 Vec3 Vec4]
            [fastmath.matrix Mat2x2 Mat3x3 Mat4x4]))
 
-;(comment
+(comment
   ;; COMMENTED OUT BECAUSE IT'S SLOW AND CONJURE IS TRYING TO RECOMPILE
   ;; IT BY DEFAULT, SO STARTUP IS SLOW.
 
@@ -192,4 +192,4 @@ small-big-combo-plots
 ;; simplistic time reporting
 (str (java.time.LocalDateTime/now))
 
-;)
+)
