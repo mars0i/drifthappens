@@ -113,25 +113,33 @@
 ;;   as newmat * newmat.
 ;; If e1 > sqrt e2, then iterate on (- e2 e1), and multiply the result
 ;; by m^e1.
+;; NOTE This means that this function has to have access to the
+;; previous result.  It can't use map, and more importantly, it's
+;; not clear that it can use something like pmap.
+;; Can I use iterate? Or reduce? If reduce or loop/recur, then it won't 
+;; be lazy unless I explicitly make it lazy.  Maybe not worth doing that.
 ;; 
 ;; Or what if I maintain a cache of previous mpow results that
 ;; are useful for higher powers?
 (defn choose-mat-powers-artfully
-  "Returns a lazy sequence of transition matrices that are integer powers
-  of square matrix m for each exponent in collection expts, which must be
-  monotonically increasing [AND FINITE??]. Exponents must be nonnegative
-  integers, which may be in a float representation."
+  "Returns a lazy [??] sequence of transition matrices that are integer
+  powers of square matrix m for each exponent in collection expts, which
+  must be monotonically increasing [AND FINITE??]. Exponents must be
+  nonnegative integers, which may be in a float representation."
   [mapper m expts]
   ;; check for empty expts?
   (let [[h w] (fmat/shape m)] ; check for equality??
-    (loop [prevm (eye h)
-           es expts]
-    (let [this-e (first es)
-          prev-e (second es) ; try to get rid of unnecess indexing later
-          sqe (math/floor (fm/sqrt this-e))]
-      (cond (== prev-e sqe) "FIXME"
-            )
-  ))))
+    (loop [prev-e (first expts)
+           es (rest expts)
+           prev-m (mpow m prev-e)
+           ms []]
+      (let [new-e (first es)
+            sqe (math/floor (fm/sqrt new-e))
+            new-m (cond (== sqe prev-e) (fmat/mulm prev-m prev-m)
+                        (< sqe prev-e) "WHAT HERE?" ; note sqe was floored
+                        :else "WHAT HERE?"
+                       )]
+        (recur new-e (rest es) new-m (conj ms prev-m)))))) ; worry about poss off-by-one
 
 (defn mat-squares
   [m]
