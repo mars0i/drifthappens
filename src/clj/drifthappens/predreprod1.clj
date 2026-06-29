@@ -27,7 +27,8 @@
   (:import [fastmath.vector Vec2 Vec3 Vec4]
            [fastmath.matrix Mat2x2 Mat3x3 Mat4x4]))
 
-(comment
+;(println "predreprod1: commented out everything")
+;(comment
   ;; COMMENTED OUT BECAUSE IT'S SLOW AND CONJURE IS TRYING TO RECOMPILE
   ;; IT BY DEFAULT, SO STARTUP IS SLOW.
 
@@ -72,8 +73,8 @@
 
 ;; These next two values should be even numbers so that when
 ;; divided by 2, we'll get integers:
-(def small-N 500)
-(def big-N 5000)
+(def small-N 200)
+(def big-N 3000)
 
 (def half-small-N (/ small-N 2))
 (def half-big-N (/ big-N 2))
@@ -192,4 +193,4 @@ small-big-combo-plots
 ;; simplistic time reporting
 (str (java.time.LocalDateTime/now))
 
-)
+;)
